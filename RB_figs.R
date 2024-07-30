@@ -55,4 +55,5 @@ ggplot(RB_MeanBioComp[3:6,], aes(as.factor(year), meanbiomass)) +
     theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
   
   RB_Density_MainandComp_se
-  
+
+# END ----  
