@@ -16,7 +16,9 @@ ggplot(RB_MeanBioComp[3:6,], aes(as.factor(year), meanbiomass)) +
        #    label = "Biomass Estimate of Destroyed Habitat", colour = "red")
 # Kristin had a label but I think that this should just go in teh caption
   
-  
+
+
+# Fig ? ---- 
   RB_Biomass_MainandComp_se <- 
     ggplot(RB_meansalmonidsbysite, 
            aes(as.factor(Year), MeanBiomass)) + 

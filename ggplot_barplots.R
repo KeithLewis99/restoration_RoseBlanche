@@ -1,4 +1,4 @@
-# This is just my attempt to consolidate Kristin Loughlin's code in a way that I understand it.  This file is for the barplots as indicated in the title.
+# This is just my attempt to consolidate Kristin Loughlin's code in a way that I understand it.  This file is for the barplots as indicated in the title.  I don't think that these are good to use in their current form as there is no need for barplots with point estiamtes.  
 
 library(ggplot2)
 
@@ -36,7 +36,7 @@ RB_sppabun_plot <-
   theme(axis.text.x  = element_text(angle=90, vjust=0.2, size=8)) +
   ylab("Population Estimate (Number/100 sq. meters)") + xlab("Year") +
   facet_grid(~Species) +
-  geom_errorbar(aes(ymax=abundance_ucl, ymin=abundance_lcl), size=1, width=0.25) +
+  geom_errorbar(aes(ymax=abundance_ucl, ymin=abundance_lcl), linewidth=1, width=0.25) +
   theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
 
@@ -59,7 +59,7 @@ RB_bothsppabun_plot <-
   theme(axis.text.x  = element_text(angle=90, vjust=0.2, size=8)) +
   ylab("Population Estimate (Number/100 sq. meters)") + xlab("Year") +
   facet_grid(Station~Species) +
-  geom_errorbar(aes(ymax=abundance_ucl, ymin=abundance_lcl), size=1, width=0.25) +
+  geom_errorbar(aes(ymax=abundance_ucl, ymin=abundance_lcl), linewidth=1, width=0.25) +
   theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
 RB_bothsppabun_plot
@@ -80,7 +80,7 @@ RB_bothsppbio_plot <-
   theme(axis.text.x  = element_text(angle=90, vjust=0.2, size=8)) +
   ylab("Biomass Estimate (grams/100 sq. meters)") + xlab("Year") +
   facet_grid(Station~Species) +
-  geom_errorbar(aes(ymax=biomass_ucl, ymin=biomass_lcl), size=1, width=0.25) +
+  geom_errorbar(aes(ymax=biomass_ucl, ymin=biomass_lcl), linewidth=1, width=0.25) +
   theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
 RB_bothsppbio_plot
@@ -104,7 +104,7 @@ RB_salmonidsbio_plot <-
   ylab("Biomass Estimate (grams/100 sq. meters)") + xlab("Year") +
   theme(legend.title=element_blank()) +
   theme(legend.position = "inside", legend.position.inside = c(.8, .85)) +
-  geom_errorbar(aes(ymax=biomass_ucl, ymin=biomass_lcl), size=1, width=0.30, position=position_dodge(.9)) +
+  geom_errorbar(aes(ymax=biomass_ucl, ymin=biomass_lcl), linewidth=1, width=0.30, position=position_dodge(.9)) +
   scale_fill_manual(values=c("dark grey", "light grey")) +
   theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
@@ -130,7 +130,7 @@ RB_salmonidsabun_plot <-
   ylab("Population Estimate (number/100 sq. meters)") + xlab("Year") +
   theme(legend.title=element_blank()) +
   theme(legend.position = "inside", legend.position.inside = c(.8, .85)) +
-  geom_errorbar(aes(ymax=abundance_ucl, ymin=abundance_lcl), size=1, width=0.30, position=position_dodge(.9)) +
+  geom_errorbar(aes(ymax=abundance_ucl, ymin=abundance_lcl), linewidth=1, width=0.30, position=position_dodge(.9)) +
   scale_fill_manual(values=c("dark grey", "light grey")) +
   theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
@@ -155,7 +155,7 @@ RB_nonetloss_plot <-
   ylab("Total Estimated Biomass (grams)") + xlab("Year") +
   theme(legend.title=element_blank()) +
   #theme(legend.position = "inside", legend.position.inside = c(.8, .85)) +
-  geom_errorbar(aes(ymax=tbiomass_ucl, ymin=tbiomass_lcl), size=1, width=0.30, position=position_dodge(.9)) +
+  geom_errorbar(aes(ymax=tbiomass_ucl, ymin=tbiomass_lcl), linewidth=1, width=0.30, position=position_dodge(.9)) +
   geom_hline(yintercept = 23940, colour="red", linetype="dashed") +
   annotate("text", x = 2.6, y = 25000, label = "'No Net Loss'", colour="red") +
   scale_fill_manual(labels = ~ stringr::str_wrap(.x, width = 15), values=c("dark grey", "red")) +
