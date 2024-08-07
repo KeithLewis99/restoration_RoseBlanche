@@ -1,0 +1,53 @@
+---
+title: "ReadMe"
+author: "Keith Lewis"
+date: "2024-08-07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Notes
+
+Got a zip file from Kristin Loughlin with folders as follows:  
+- Carle Strub Estimates  
+- RB_depletion  
+- a bunch of files which have been put in:  
+    - data  
+    - figs_Kristin  
+    
+I have recreated all teh figures although there are still questions, especially about the confidence intervals.
+
+# AMEC functions  
+These work as follows:
+- bring in a file and name it  
+- have some warnings  
+- could loop over year and site but Kristin has not done that  
+- some summaries created   
+- a linear regression is used for the delury model  
+- then library FSA, with function removal calculates abundance and biomass
+- then, break down overall estimates of biomass or abundance by species based on proportions and get standardized (stand) with estimates scaled by  Area  
+- add traditional estimates of biomass (stand.trad.species.biomass.contributions) calculated from mean weights of abundance (not quite sure what these are but these seem to get used)
+
+
+Graphs and other output don't seem to display very well.
+
+# Issues
+## Delta Method (DM)
+So, I have reconstructed the Delta Method in scratch pad using BT:2000 sites - see scratch_pad.R for the explanation.  Kristin did not use the DM as far as I know.  Usually, the DM results in a higher variance than naive averaging of the variances but not for BT:2000:Compensation.  
+Note: The more replicates you have, the larger the denominator and ergo, the lower the variance.  
+Note: its the sum of the partial derivatives * variance by site that gives the combined variance - I initially summed the partial derivates.  
+
+So, the question is, 1) to use Kristin's values which are probably actually a bit of an overestimate or 2) to reconstruct everything from scratch with the AMEC functions and build the machinary that is in scratch_pad.R for everything.
+
+I guess it comes down to the data sets used for the figures and the eventual analyses:  
+- RB_carlestrub_output_each_spp_by_site -> this is distilled down to means and naive SEs by species and year; (graphs in mean_estimates_se_species.R)    
+- RB_MeanBioComp/RB_meansalmonidsbysite  -> these have already been distilled down to compensation and main; (graphs in RB_figs.R)  (see next section).  I don't think that this is quite right - I think that this effectively groups all of the sites as one big site; this is the essence of pseudo-replication.
+
+## what did Kristin do with the AMEC functions?  
+- did she modify different input files, e.g., by site, main v compensation, low/medium/upper v main, by salmonids or different species, and feed them separately into the AMEC functions?  Or, did she modify the output??  ANSWER: I strongly suspect the later.  See scratch_pad.R - in "origin", I showed that running "RoseBlancheAug2000bytypecombinednoeels.csv" through the AMEC function perfectly reproduces the data in "RB_salmonids_maincomp.csv".  So, this means that the data were likely manipulated in Excel before hand and then fed in for custom summaries.  I think that "Station" is simply whatever the analyst wants to summarize the data on, kind of like group_by.
+
+# Conclusions
+I think that the best thing to do, ito graphs and analyses, is to redo this from the ground up.  Clearly, there is a lot of good work that was done but its not reproducbile and if any reviewer knows about this stuff, we will have to redo it anyway.  The existing data sets have either been naively calculated or, just don't have the variance estimates (confidence intervals).
