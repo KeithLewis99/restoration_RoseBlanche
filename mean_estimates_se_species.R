@@ -1,11 +1,12 @@
-
+# This is just my attempt to consolidate Kristin Loughlin's code in a way that I understand it.
+# This is for Biomass by species and Type Plot
 
 library(ggplot2)
 source("RB_data.R")
 
-####Biomass by species and Type Plot
 
 
+# Fig 7 ----
 jpeg("RB_Spp_Biomass_cs.jpg", width=6.5, height=4, units='in', res=300)
 
 ggplot(RB_Spp_Biomass_cs, aes(as.factor(Year), mean)) + 
@@ -22,8 +23,7 @@ ggplot(RB_Spp_Biomass_cs, aes(as.factor(Year), mean)) +
 dev.off()
   
 
-#######DENSITY
-
+## Fig 8 ----
 jpeg("RB_Spp_density_cs.jpg", width=6.5, height=4, units='in', res=300)
 
 ggplot(RB_Spp_Density, aes(as.factor(Year), mean)) + 

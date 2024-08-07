@@ -10,7 +10,8 @@ source("RB_data.R")
 jpeg("RB_spp_plot.jpg", width=6.5, height=4, units='in', res=300)
 
 
-allspp_plot<-ggplot(allspp_comp, aes(Year, biomass_100m)) + 
+allspp_plot <-
+  ggplot(allspp_comp, aes(Year, biomass_100m)) + 
   theme_bw() + 
   geom_bar(position=position_dodge(), stat="identity") + 
   theme(axis.text.x  = element_text(angle=90, vjust=0.2, size=8)) +
@@ -25,7 +26,7 @@ dev.off()
 par(mfrow=c(1,1))
 
 
-## density ----
+## abundance ----
 #####Plot of abundance estimate for each species each year in Compensation Stream
 jpeg("RB_sppabun_plot.jpg", width=6.5, height=4, units='in', res=600)
 
