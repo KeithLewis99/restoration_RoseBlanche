@@ -195,13 +195,50 @@ pivot_wider(names_from = Station, values_from = biomass.caught) |>
 
 
 
-df_tab <- RB_carlestrub_output_each_spp_by_site_all[, c(1:4, 8)]
-str(df_tab)
+df_abun <- RB_carlestrub_output_each_spp_by_site_all[, c(1:4, 8)]
+str(df_abun)
+
+df_abun[df_abun$Species != "EEL",]
 
 library(tidyr)
-df_tab |>
+df_tab1 <- df_abun[df_abun$Species != "EEL",] |>
   select(Species, Year, Station, abundance.caught) |>
   pivot_wider(names_from = Station, values_from = abundance.caught) |>
   arrange(Species) |>
   print(n = Inf)
+
+sum(is.na(df_tab1))/(10*16)
+
+temp <- subset(df_abun, abundance.caught < 10)
+length(temp$abundance.caught)
+
+df_abun[df_abun$abundance.caught >= 30 & !is.na(df_abun$abundance.caught), ]
+
+
+# now, to look at the variances
+
+str(dft, give.attr = F)
+df_tab2 <- dft |> 
+  ungroup() |>
+  select(Species, Year, Station, bm_var) |>
+  pivot_wider(names_from = Station, values_from = bm_var) |>
+  arrange(Species) |>
+  print(n = Inf)
+
+sum(is.na(df_tab2))/(10*16)
+
+length(df_tab2[df_tab2 == 0])
+
+length(dft$bm_var[dft$bm_var > 100 & !is.na(dft$bm_var)]) # length >10 = 30, >50 = 13, >100 = 9
+
+
+# now, looking at abundance
+df_abun[df_abun$abundance.caught >= 30 & !is.na(df_abun$abundance.caught), ]
+length(df_abun$abundance.caught[df_abun$abundance.caught <= 5 & !is.na(df_abun$abundance.caught)])/(10*16) # > 30 = 7, > 20 = 16, > 10 = 34, > 5 = 0.56 - so proportions aren't that much different BUT
+sum(is.na(df_abun$abundance.caught))/(10*16) # lots of sites with NAs - no fish
+
+
+# trying to download RB data from gbd file
+
+sf::st_read(dsn = "../RoseBlanche_wpts_2015.gdb")
 # END ----
