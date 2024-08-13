@@ -1,5 +1,5 @@
 ---
-title: "ReadMe"
+title: "ReadMe - Rose Blanche"
 author: "Keith Lewis"
 date: "2024-08-07"
 output: html_document
@@ -8,6 +8,11 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+
+# Introduction
+This file is simply a record of issues that I have had with the Rose Blanche analysis that was started by Kristin Loughlin and is a continuation of work begun by Dave Scruton. See ReadMe files from Pamehac and Seal Cove for additional info.
+
 
 # Notes
 
@@ -18,21 +23,30 @@ Got a zip file from Kristin Loughlin with folders as follows:
     - data  
     - figs_Kristin  
     
-I have recreated all teh figures although there are still questions, especially about the confidence intervals.
+I reorganized for my own needs.  I have recreated all teh figures although there are still questions, especially about the confidence intervals.
 
 # AMEC functions  
-These work as follows:
-- bring in a file and name it  
+These work as follows:  
+- bring in a file and name it   
 - have some warnings  
 - could loop over year and site but Kristin has not done that  
 - some summaries created   
 - a linear regression is used for the delury model  
 - then library FSA, with function removal calculates abundance and biomass
 - then, break down overall estimates of biomass or abundance by species based on proportions and get standardized (stand) with estimates scaled by  Area  
-- add traditional estimates of biomass (stand.trad.species.biomass.contributions) calculated from mean weights of abundance (not quite sure what these are but these seem to get used)
+- add traditional estimates of biomass (stand.trad.species.biomass.contributions) calculated from mean weights of abundance (not quite sure what these are but these seem to get used)  
+
+But this is only a cursory overview.  Further, the graphs and other output that are supposed to be part of the function don't seem to display very well or at all.  I feel like a lot of diagnostics and other things are being missed.  
 
 
-Graphs and other output don't seem to display very well.
+# estimates
+- biomass  
+- stand.biomass - this is what seems to be used  
+- trad.biomass  
+- stand.trad.biomass  
+
+Note: in the Excel file - "RB_carlestrub_output_each_spp_by_site.xlsx", the estimates for all but **stand.species.biomass.contr** and abundance were hidden.  This made it look like they hadn't been done.  In the corresponding csv file, the columns have been relabelled **biomass_cs** and missing species have been added with zeros and the "Type", i.e., "Compensation" or "Main" has been written in.  But this means that I don't have to redo all the estimates and could use the Delta method. 
+
 
 # Issues
 ## Delta Method (DM)
@@ -46,8 +60,15 @@ I guess it comes down to the data sets used for the figures and the eventual ana
 - RB_carlestrub_output_each_spp_by_site -> this is distilled down to means and naive SEs by species and year; (graphs in mean_estimates_se_species.R)    
 - RB_MeanBioComp/RB_meansalmonidsbysite  -> these have already been distilled down to compensation and main; (graphs in RB_figs.R)  (see next section).  I don't think that this is quite right - I think that this effectively groups all of the sites as one big site; this is the essence of pseudo-replication.
 
+
 ## what did Kristin do with the AMEC functions?  
 - did she modify different input files, e.g., by site, main v compensation, low/medium/upper v main, by salmonids or different species, and feed them separately into the AMEC functions?  Or, did she modify the output??  ANSWER: I strongly suspect the later.  See scratch_pad.R - in "origin", I showed that running "RoseBlancheAug2000bytypecombinednoeels.csv" through the AMEC function perfectly reproduces the data in "RB_salmonids_maincomp.csv".  So, this means that the data were likely manipulated in Excel before hand and then fed in for custom summaries.  I think that "Station" is simply whatever the analyst wants to summarize the data on, kind of like group_by.
+
+- zeros were added when there were no fish, presumably under the assumption that three passes with an electro fisher should result in at least some fish being caught.  
+- NA's show up in the variance because there aren't enough fish to estimate it
+Note: there are three possible scenarios: pt estimate == 0 and NA for CI, pt estiamte > 0 but NA for CI bc not enough samples to estiamte variance, pt estimate > 0 and variance > 0 [ this can all occurn in one species, year, e.g., RB:AS:2002:Main_Stem]  
+- Variance will increase do to few samples and range of weight of fish.  
+- CIs for BT were generally small at the Station level but for BT:Station7:2000-2001, there were either few fish caught or the assumption of catching fewer fish with each pass was violated.  This seems to result in the large confidence intervals.  
 
 # Conclusions
 I think that the best thing to do, ito graphs and analyses, is to redo this from the ground up.  Clearly, there is a lot of good work that was done but its not reproducbile and if any reviewer knows about this stuff, we will have to redo it anyway.  The existing data sets have either been naively calculated or, just don't have the variance estimates (confidence intervals).
