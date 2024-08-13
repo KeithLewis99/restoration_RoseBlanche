@@ -192,4 +192,16 @@ pivot_wider(names_from = Station, values_from = biomass.caught) |>
   arrange(Species) |>
   print(n = Inf)
 
+
+
+
+df_tab <- RB_carlestrub_output_each_spp_by_site_all[, c(1:4, 8)]
+str(df_tab)
+
+library(tidyr)
+df_tab |>
+  select(Species, Year, Station, abundance.caught) |>
+  pivot_wider(names_from = Station, values_from = abundance.caught) |>
+  arrange(Species) |>
+  print(n = Inf)
 # END ----
