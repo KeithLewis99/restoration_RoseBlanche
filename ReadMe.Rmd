@@ -39,15 +39,25 @@ These work as follows:
 But this is only a cursory overview.  Further, the graphs and other output that are supposed to be part of the function don't seem to display very well or at all.  I feel like a lot of diagnostics and other things are being missed.  
 
 
-# estimates
-- biomass  
-- stand.biomass - this is what seems to be used  
-- trad.biomass  
-- stand.trad.biomass  
+# CS output
+- biomass.caught: what was actually caught
+- species.biomass.contributions  = "combined.biomass.cs.estimate*species.proportion$biomass.proportion"
+- stand.species.biomass.contr - this is what seems to be used - basically species.biomass.contributions scaled by area  
+- trad.species.biomass.contributions  = "e.fishing.summary.data$biomass.caught/e.fishing.summary.data$abundance.caught*e.fishing.summary.data$species.abundance.contributions"
+- stand.trad.species.biomass.contributions = e.fishing.summary.data$biomass.caught/e.fishing.summary.data$abundance.caught*e.fishing.summary.data$stand.species.abundance.contr
 
+Note: the "combined.biomass.cs.estimate" is from function removal in package FSA using the CarleStrub method so this is the actual estimate of all species multiplied by the proportion
 Note: in the Excel file - "RB_carlestrub_output_each_spp_by_site.xlsx", the estimates for all but **stand.species.biomass.contr** and abundance were hidden.  This made it look like they hadn't been done.  In the corresponding csv file, the columns have been relabelled **biomass_cs** and missing species have been added with zeros and the "Type", i.e., "Compensation" or "Main" has been written in.  But this means that I don't have to redo all the estimates and could use the Delta method. 
 
+# CS Method ----
 
+The CS method seems to be robust.  Cowx (1983) said that Zippin is fine when the proportion of the population taken in successive catches remains constant.  But if not, CS is only way (at the time) to produce reliable results. Hedger et al. (2013) say that "The results from this study suggest that in the absence of prior information on capture probability, the Carle & Strub method is the best of the removal methods."....but that at least 30 individuals are required before estimating abundance.
+
+Ogle gives the assumptions as closed populatoin (which seems reasonable) and that the probability of cpature for an animal is constant for all animals from sample to sample (which may or may not be reasonable).
+
+Cowx, I.G. 1983. Review of the methods for estimating fish population size from Survey Removal Data. Fish Mgmt 14: 67-82.
+Hedger et al. 2013. Improving abundance estimates from electorfishing removal sampling. Fish Res. 137: 104-115
+Derek Ogle: fishR vignette 2013.  
 # Issues
 ## Delta Method (DM)
 So, I have reconstructed the Delta Method in scratch pad using BT:2000 sites - see scratch_pad.R for the explanation.  Kristin did not use the DM as far as I know.  Usually, the DM results in a higher variance than naive averaging of the variances but not for BT:2000:Compensation.  
