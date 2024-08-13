@@ -12,6 +12,11 @@ library(plyr)
 
 RB_carlestrub_output_each_spp_by_site <- read.csv("../Carle Strub Estimates/RB_carlestrub_output_each_spp_by_site.csv")
 
+RB_carlestrub_output_each_spp_by_site_all <- read.csv("../Carle Strub Estimates/RB_carlestrub_output_each_spp_by_site_all.csv")
+
+
+str(RB_carlestrub_output_each_spp_by_site_all)
+
 ## 2000-2015 with averages of species by year and site with the CI
 ## this is the same values as in file RB_carlestrub_output_each_spp_maincomp.xlsx for stand.species.biomass.contr
 RB_spp_maincomp <- read.csv("../Carle Strub Estimates/RB_spp_maincomp.csv")
@@ -55,6 +60,7 @@ RB_Spp_Density <- ddply(RB_carlestrub_output_each_spp_by_site, c("Year", "Type",
 )
 
 RB_Spp_Density
+
 
 
 # END ----
