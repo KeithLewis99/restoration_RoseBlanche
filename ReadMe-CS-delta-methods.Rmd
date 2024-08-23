@@ -1,0 +1,113 @@
+---
+title: "ReadME-CS & Delta Methods"
+author: "Keith Lewis"
+date: "2024-08-16"
+output: html_document
+---
+
+# FSA
+Derek Ogle has made a wonderful package for those of us who don't come from teh fisheries world.  The "removal" function is used to estimate biomass/abundance (b/a) for depletion approaches such as Carle-Strub (CS: see below).  It is an incredible simple function - simply input a vector of biomasses/abundace, e.g., for a 3-pass electrofishing, c(20, 10, 5) and specify the method.  In his book, he shows how to do this for a variety of sites.  Simple and simple is good!
+
+FSA calculates a metric (b/a).  95% CI = metric +/- 1.96*SE.  Like most parameters (not means), the SE is the SD of the estimate as gets used in CIs - so variance = SE^2 (see https://drlvk.github.io/nm/section-standard-error.html)
+
+I tried looking at the code for the CarleStrub function in package FSA (in R and Github) but can't figure out how it works in R.  Below are some websites about the math which I also can't quite figure out. 
+
+But I have figured out how to run a bunch of sites through FSA and get the output which includes the catches, the parameters (k - passes, T - total catch, X - a variable used in calculations, and the actual estimates of N and p (capture probability).  This was very useful for figuring out why the CIs are so wide (see below). 
+
+Lockwood 2000, Eg. 7.6.  Using the 2-pass method, the assumption of constant p can be determined by CMR.  With 3-passes, plot catch against the sum of call previous catches. Or, a goodness of fit test.  
+
+
+# CS Method
+
+The CS method seems to be robust.  Cowx (1983) said that Zippin is fine when the proportion of the population taken in successive catches remains constant.  But if not, CS is only way (at the time) to produce reliable results. Hedger et al. (2013) say that "The results from this study suggest that in the absence of prior information on capture probability, the Carle & Strub method is the best of the removal methods."....but that at least 30 individuals are required before estimating abundance.
+
+Ogle gives the assumptions as closed populatoin (which seems reasonable) and that the probability of cpature for an animal is constant for all animals from sample to sample (which may or may not be reasonable).
+
+However, Multipass methods do not provide robust estimates of abundance when numbers captured are low - need > 30 before estimating abundance (Hedger 2013).  We are no where near this on Pamehac in many cases.  
+
+I also found that there is a negative exponential relationship between capture probability and variance, a linear relationship between ratio of X/No - which suggests that when first and second capture are large and p, and a negative linear relationship between c3/T and p - suggests that the lower the last catch is relative to total catch, then lower p and therefore, lower the variance.
+
+## Diagnostics
+## CS: variance and confidence intervals
+See FSA above although these are really me just guessing.  Lockwood 2000 e.g. 7.6 demonstrates recommends plotting catch v sum of previous catch which should be a straight line and doing a goodness of fit test (my results match theirs within rounding error)
+
+The CIs around the point estimates appear symmetrical which suggests that this is a normal distribution and can result in LCI <0.
+
+### Question
+**Question:** When to use and when not to use the CS method.  Looking just at Pam:2016:AS, I found that 2/10 sites fail the GF test and 2 more fail the plotting test.  But there are problems with pooling the data - see below
+
+I explored the Moran and Schnute methods which account for unequal catchability but some of the UCL are Inf so that won't work.  
+
+### Why are some CIs wide
+Several reasons:
+1. lack of data  - if only a few fish, often get NA, e.g., BT:1990:SITE 6 - pass 1 had 1 fish, pass 2 had 2 fish, pass 3 had 1 fish.  Also depends on if you use all the passes.
+2. In some cases, either lots of fish are caught on the last pass or, more fish are caught on the second/third passes than previous ones.  This inflates the variance and results in really wide CIs not to mention poor diagnostics.  
+
+
+# AMEC functions  
+These are used to calculate b/a using the CS method.  These were written by Dave Cote.  We talked and he said that some of the things that he did were to find solutions to particular problems.  But they were his solutions and not neccessarily the best thing to do in each situation. He also talked about picking your poison (my term) with these approaches as there is not going to be a one approach fits all for all sites and species-age classes.
+- Consider the equal probability of capture problem  
+- That doing species specific approaches if you can
+- account for rare species, e.g. BT are very rare on Pamehac
+
+
+## general format
+These work as follows:  
+- bring in a file and name it   
+- have some warnings  
+- some summaries created   
+- The AMEC function does a DeLury biomass depletion model (see Krebs, Ecological Methodology) first to see if there is a negative slop and if yes, does the CS approach. 
+- then library FSA, with function removal calculates abundance and biomass
+- then, break down overall estimates of biomass or abundance by species based on proportions and get standardized (stand) with estimates scaled by  Area  
+- add traditional estimates of biomass (stand.trad.species.biomass.contributions) calculated from mean weights of abundance (not quite sure what these are but these seem to get used)  
+
+Note: FSA::removal gets used 4 times: for biomass/abundance by species and for a combined biomass/abundance (see how calculated below). 
+Note: AMEC uses FSA::removal on biomass and the $junk variable (a vector of '1') is summed to get abundance and for calculations of abundance.proportion.  In Derek Ogle's book, he used abundance and doesn't mention biomass.  But I think that this should be OK because the depletion equation doesn't really care if its biomass or abundance so long as there is some depletion.  
+Note: the function seems to calculate b/a for all species for one site and loops through the sites - found this out using browser().
+But this is only a cursory overview.  Further, the graphs and other output that are supposed to be part of the function don't seem to display very well or at all.  The output is actually in the plots window in RStudio but there seems to be a lot of repitition.  
+
+What I don't understand is the L83-261 is a for loop for each species but this doesn't get used in teh analysis.  Then, a series of ifelse statments using the delury method to see if the slope is <0 and length >2 for biomass/abundance and for combinded (pooled) biomass/abundance.  
+
+
+## output
+Dave Cote's AMEC function produces the following:  
+- biomass.caught: what was actually caught
+- species.biomass.contributions  = "combined.biomass.cs.estimate*species.proportion$biomass.proportion"
+- stand.species.biomass.contr - this is what seems to be used - basically species.biomass.contributions scaled by area  
+- trad.species.biomass.contributions  = "e.fishing.summary.data$biomass.caught/e.fishing.summary.data$abundance.caught*e.fishing.summary.data$species.abundance.contributions"
+- stand.trad.species.biomass.contributions = e.fishing.summary.data$biomass.caught/e.fishing.summary.data$abundance.caught*e.fishing.summary.data$stand.species.abundance.contr
+
+Note: the "combined.biomass.cs.estimate" is from function removal in package FSA using the CarleStrub method so this is the actual estimate of all species multiplied by the proportion  
+
+Question: Why does the AMEC function not return its output aside from a graph and a csv file???  
+
+## Pooled v. not pooled
+Based on the notes in the "general format" section and in my notebook (2024-08-16), and tests I did within the function using the browser() function and scratch_pad.R (Pamehac) and by filtering files in Excel, it is clear that the AMEC function takes total raw b/a for a given year and uses CS to get a pooled estimated b/a **by site**.  This results in the combined (pooled) estimates being different from those calculated on a species and site specific basis because all fish from a site are pooled and a b/a is estimated with an associated variance and by extension, a CI.  These values are then multiplied by the proportion of each species which is based on the raw b/a and then transformed in to a very tight, naive CI. Further, values with only a few passes are filled in using raw values.  
+
+I can see that the pooled gives a better and tighter estimate but it seems to be an apples and oranges argument. Further, it makes no sense to use the raw abundance to generate a new CI because that is the reason for the CS method ---- you miss fish.  At the very least, it seems like the estimated abundance should be used and then the delta method for scaling the CIs.  
+
+Note: I now think that its best to calculate abundance and then derive a biomass estimate from that.
+
+
+# Delta Method (DM)
+The delta method produces negative lower CIs.  This should not happen but my guess is that the Carle Strube (CS) method uses a normal distribution, ergo when the variance is high and the point estimate is close to zero, you get negative CIs.  Some of this is also because the zeros in teh data - the zeros pull the mean values down but the variances are based on the sites with fish so you get a double whammy effect.  See also CS method for potential problems.  
+
+Wrote Greg Roberston who suggests that the DM may not be appropriate in this case.
+See: https://bookdown.org/ts_robinson1994/10EconometricTheorems/dm.html
+Could use a bootstrap?
+Do we use weights to account for the fact that the biomass and density are simply estimates from a single site.
+
+**Ignore the above:** I made some mistakes in my initial formulation of the delta method.  First, I did the partial derivative as variance/n^2 when it should just be 1/n^2.  Then, I got SE of the mean and SE of the parameter mixed up.  Variance should be the SE^2 (which I did) but there is no SD (see FSA above).  But the graphs look ok now.
+
+
+# References
+Cowx, I.G. 1983. Review of the methods for estimating fish population size from Survey Removal Data. Fish Mgmt 14: 67-82.
+Hedger et al. 2013. Improving abundance estimates from electorfishing removal sampling. Fish Res. 137: 104-115
+Derek Ogle: fishR vignette 2013.  
+
+
+# Useful websites
+https://www.pisces-conservation.com/removalhelp/index.html?maximumweightedlikelihood.htm  
+https://derekogle.com/fishR/examples/oldFishRVignettes/Depletion.pdf  
+https://www2.dnr.state.mi.us/PUBLICATIONS/PDFS/ifr/Manual/SMII%20Chapter07.pdf 
+https://drlvk.github.io/nm/section-standard-error.html
