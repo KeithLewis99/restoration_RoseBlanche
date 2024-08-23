@@ -38,6 +38,8 @@ The CIs around the point estimates appear symmetrical which suggests that this i
 
 I explored the Moran and Schnute methods which account for unequal catchability but some of the UCL are Inf so that won't work.  
 
+Did some more digging the the Hedger paper may have some insights, i.e., use constant capture prob or variable capture prob.
+
 ### Why are some CIs wide
 Several reasons:
 1. lack of data  - if only a few fish, often get NA, e.g., BT:1990:SITE 6 - pass 1 had 1 fish, pass 2 had 2 fish, pass 3 had 1 fish.  Also depends on if you use all the passes.
