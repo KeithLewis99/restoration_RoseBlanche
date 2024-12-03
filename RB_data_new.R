@@ -339,16 +339,26 @@ tmp2 <-
 # df_a for analysis
 df_a <- full_join(tmp1, tmp2, by = c("Year", "Species", "Station"))
 df_a |> print(n = Inf)
-
-# there was a construction in 1998 but we dont' seem to have that or 1999.
-#df_a$Time <- NA
-
-# upstream and downstrea
-
+str(df_a, give.attr=F)
+# df_a$time <- NA
+# df_a$type <- NA
+# 
 # df_a <- df_a |>
-#   mutate(type = if_else())
-# str(df_glmm, give.attr=FALSE)  
+#   mutate(time = if_else(Year == 1990, "before", "after")) |>
+#   mutate(type = if_else(Station == "6"|Station == "7", "above", "below"))
 
+# from RoseBlancheAug2001bysite.xlsx - these are in order by station so Station 1 == 221, and Station 10 == 413
+station <- c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
+area <- c(221, 216, 432, 361, 340, 239, 237, 252, 311, 413)
 
+df_area <- data.frame(station, area)
+str(df_area)
+df_area$station <- as.numeric(df_area$station)
+
+# join dataframes
+df_a <- left_join(df_a, df_area, by = c("Station" = "station"))
+df_a <- df_a |>
+  group_by(Year, Species, Station) |>
+  mutate(abun.stand = abun/area, bio.stand = bio/area)
 
 # END ----
