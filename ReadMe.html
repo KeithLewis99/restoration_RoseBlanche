@@ -363,6 +363,9 @@ display: none;
 Blanche analysis that was started by Kristin Loughlin and is a
 continuation of work begun by Dave Scruton. See ReadMe files from
 Pamehac and Seal Cove for additional info.</p>
+<p>**See “ReadMe-CS-delta-methods” for general notes on the AMEC
+function (how it works and output), the CS Method, and Delta Method.
+This files is for specifics of the RB analysis.</p>
 </div>
 <div id="notes" class="section level1">
 <h1>Notes</h1>
@@ -375,44 +378,7 @@ Pamehac and Seal Cove for additional info.</p>
 <p>I reorganized for my own needs. I have recreated all teh figures
 although there are still questions, especially about the confidence
 intervals.</p>
-</div>
-<div id="amec-functions" class="section level1">
-<h1>AMEC functions</h1>
-<p>These work as follows:<br />
-- bring in a file and name it<br />
-- have some warnings<br />
-- could loop over year and site but Kristin has not done that<br />
-- some summaries created<br />
-- a linear regression is used for the delury model<br />
-- then library FSA, with function removal calculates abundance and
-biomass - then, break down overall estimates of biomass or abundance by
-species based on proportions and get standardized (stand) with estimates
-scaled by Area<br />
-- add traditional estimates of biomass
-(stand.trad.species.biomass.contributions) calculated from mean weights
-of abundance (not quite sure what these are but these seem to get
-used)</p>
-<p>But this is only a cursory overview. Further, the graphs and other
-output that are supposed to be part of the function don’t seem to
-display very well or at all. I feel like a lot of diagnostics and other
-things are being missed.</p>
-</div>
-<div id="cs-output" class="section level1">
-<h1>CS output</h1>
-<ul>
-<li>biomass.caught: what was actually caught</li>
-<li>species.biomass.contributions =
-“combined.biomass.cs.estimate*species.proportion$biomass.proportion”</li>
-<li>stand.species.biomass.contr - this is what seems to be used -
-basically species.biomass.contributions scaled by area<br />
-</li>
-<li>trad.species.biomass.contributions = “e.fishing.summary.data<span class="math inline">\(biomass.caught/e.fishing.summary.data\)</span>abundance.caught*e.fishing.summary.data$species.abundance.contributions”</li>
-<li>stand.trad.species.biomass.contributions =
-e.fishing.summary.data<span class="math inline">\(biomass.caught/e.fishing.summary.data\)</span>abundance.caught*e.fishing.summary.data$stand.species.abundance.contr</li>
-</ul>
-<p>Note: the “combined.biomass.cs.estimate” is from function removal in
-package FSA using the CarleStrub method so this is the actual estimate
-of all species multiplied by the proportion Note: in the Excel file -
+<p>Note: in the Excel file -
 “RB_carlestrub_output_each_spp_by_site.xlsx”, the estimates for all but
 <strong>stand.species.biomass.contr</strong> and abundance were hidden.
 This made it look like they hadn’t been done. In the corresponding csv
@@ -421,29 +387,15 @@ missing species have been added with zeros and the “Type”, i.e.,
 “Compensation” or “Main” has been written in. But this means that I
 don’t have to redo all the estimates and could use the Delta method.</p>
 </div>
-<div id="cs-method--" class="section level1">
-<h1>CS Method —-</h1>
-<p>The CS method seems to be robust. Cowx (1983) said that Zippin is
-fine when the proportion of the population taken in successive catches
-remains constant. But if not, CS is only way (at the time) to produce
-reliable results. Hedger et al. (2013) say that “The results from this
-study suggest that in the absence of prior information on capture
-probability, the Carle &amp; Strub method is the best of the removal
-methods.”….but that at least 30 individuals are required before
-estimating abundance.</p>
-<p>Ogle gives the assumptions as closed populatoin (which seems
-reasonable) and that the probability of cpature for an animal is
-constant for all animals from sample to sample (which may or may not be
-reasonable).</p>
-<p>Cowx, I.G. 1983. Review of the methods for estimating fish population
-size from Survey Removal Data. Fish Mgmt 14: 67-82. Hedger et al. 2013.
-Improving abundance estimates from electorfishing removal sampling. Fish
-Res. 137: 104-115 Derek Ogle: fishR vignette 2013.<br />
-# Issues ## Delta Method (DM) So, I have reconstructed the Delta Method
-in scratch pad using BT:2000 sites - see scratch_pad.R for the
-explanation. Kristin did not use the DM as far as I know. Usually, the
-DM results in a higher variance than naive averaging of the variances
-but not for BT:2000:Compensation.<br />
+<div id="issues" class="section level1">
+<h1>Issues</h1>
+<div id="delta-method-dm" class="section level2">
+<h2>Delta Method (DM)</h2>
+<p>So, I have reconstructed the Delta Method in scratch pad using
+BT:2000 sites - see scratch_pad.R for the explanation. Kristin did not
+use the DM as far as I know. Usually, the DM results in a higher
+variance than naive averaging of the variances but not for
+BT:2000:Compensation.<br />
 Note: The more replicates you have, the larger the denominator and ergo,
 the lower the variance.<br />
 Note: its the sum of the partial derivatives * variance by site that
@@ -463,6 +415,7 @@ distilled down to compensation and main; (graphs in RB_figs.R) (see next
 section). I don’t think that this is quite right - I think that this
 effectively groups all of the sites as one big site; this is the essence
 of pseudo-replication.</p>
+</div>
 <div id="what-did-kristin-do-with-the-amec-functions" class="section level2">
 <h2>what did Kristin do with the AMEC functions?</h2>
 <ul>
