@@ -1,12 +1,26 @@
 ---
 title: "ReadMe - Rose Blanche"
 author: "Keith Lewis"
-date: "2024-08-07"
-output: html_document
+date: Sys.Date()
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+bibliography: refs/references.bib
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+df_all <- read.csv("data_derived/df_all.csv")
+df_tab3 <- read.csv("data_derived/df_tab3.csv")
+df_a <- read.csv("data_derived/df_a3.csv")
+df_out <- read.csv("data_derived/FSA_output.csv")
+df_sum_subset <- read.csv("data_derived/spc_example.csv")
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
 ```
 
 
@@ -54,3 +68,178 @@ Note: there are three possible scenarios: pt estimate == 0 and NA for CI, pt est
 
 # Conclusions
 I think that the best thing to do, ito graphs and analyses, is to redo this from the ground up.  Clearly, there is a lot of good work that was done but its not reproducbile and if any reviewer knows about this stuff, we will have to redo it anyway.  The existing data sets have either been naively calculated or, just don't have the variance estimates (confidence intervals).
+
+# Post 2025, August
+I did a lot of work initially on Rose Blanche and this helped me to arrive at the approaches used on Pamehac and Granite.  However, I abandonded it because I didn't have the lat/longs and the 1998 data.  I have tried to locate the 1998 data to no avail.  I does not appear to be on the archive, nor is it in Scruton's papers.  So, we'll just have to proceed with a CI study and hope that its OK.  
+
+The below will follow the format of the Pamehac study.  See Pamehac and Granite for thoughts on models and approach and what have I learned.
+
+# Data {.tabset}
+
+## Notes
+...
+
+## Files
+- RB_data_new.R: import data  
+- RB_abun_bio.R: do FSA and goodness-of-fit calculations - RB_figs.R  
+- RB_fun.R  
+- RB_analyses.R: GLMMs  
+- RB_tables: bootstrap values 
+
+## Pipeline
+**check the below**
+SD = sweep disaggreated, SA = sweep aggregated
+- ls_rb: list of electrofishing files in the Pamehac directory; SD  
+- df_all: take ls_pam and make a dataframe; clean it up; SD  
+- df_sum: from df_all, calculate biomass and abundance for each sweep; SD  
+- df_grid: create a grid with all possible rows for Year, Station, Species, and Sweep - this is to take care of the "no line when no fish of a given species is caught" problem; SD  
+df_grid1: take out the structural zeros; SD  
+- df_all1: join df_grid1 with df_sum to make a complete data set; SD  
+- df_all2: join df_all1 with df_stn_tag (max sweeps per year) to remove extra sweeps; replace NA's with zeros; calculate spc; SD  
+- df_a: Sweeps < 3; sum abundance and biomass; SA; df_a2: add area; df_a3: add location  
+- df_a1: this may be a relic
+- df_tab1: tabular format of abundance and biomass, Sweep <= 3; SA  
+- df_tab2: tabular format of abundance and biomass, all Sweeps; SA  
+- df_tab3: tabular format of abundance and biomass, all Sweeps whether fish or not
+- df_tab_T: sum by species and year; tabular format
+- df_tab_T1: as above but with sweeps  
+
+## map
+```{r, map, echo = F}
+tmp <- read.csv("../data/waypoints_RB.csv") |>
+  dplyr::filter(!(Site == "rb8pp" |
+             Site == "Rbcsixtpp" |
+             Site == "Site 3"  |
+             Site == "Site rbc4" |
+             Site == "Rbmaim9tp")
+         )
+library(leaflet)
+leaflet()%>%
+   setView(lng = -58.7,lat=47.64,zoom=11)%>%addTiles()%>%
+   addCircleMarkers(data=tmp, lng=tmp$west, lat=tmp$north,
+                    popup = ~sites,
+                    label = ~sites,
+                    radius = 6,
+                    color = 'black',
+                    fillColor = 'blue',
+                    stroke = TRUE,
+                    weight = 1,
+                    fillOpacity = 0.5) 
+
+```
+
+
+# Analyses
+See restoration Granite Readme.qmd and Pamehac Readme.Rmd, especially the What Have I Learned (WHIL)
+
+**need to check the below**
+
+## Analyses {.tabset}
+
+### data summaries
+```{r}
+nrow(df_all) # number of fish caught
+sum(rowSums(!is.na(df_tab3[,4:8]))) # number of sites sampled assuming 5 passes in 1990, 1991, 1996 and 3 in 1992 and 2016, including sweeps with abun == 0
+nrow(df_tab3) # number of site:species:years including sweeps with abun == 0; assumes previous is true
+nrow(df_a) # number of site:species:years that can be used in FSA
+nrow(df_out)
+```
+
+### low n
+```{r}
+
+nrow(df_a |> filter(T < 30)) # 97 of 124
+nrow(df_a |> filter(T < 20)) # 85 of 124
+nrow(df_a |> filter(T < 10)) # 57 of 124
+nrow(df_a |> filter(T < 5)) # 33 of 124
+
+nrow(df_out |> filter(T < 30)) # 97 of 124
+nrow(df_out |> filter(T < 20)) # 85 of 124
+nrow(df_out |> filter(T < 10)) # 57 of 124
+nrow(df_out |> filter(T < 5)) # 33 of 124
+```
+
+### spc
+```{r, echo=FALSE}
+p <- ggplot(df_sum_subset, 
+  aes(x = spc, y = abun, 
+    group = Station, fill = Station,
+    text = paste("SPC: ", spc, "\n",
+                 "Abund: ", abun, "\n",
+                 "Stn: ", Station, "\n",
+                 "Sweep: ", Sweep,
+                 sep = "")
+  )) +
+  geom_point() +
+  geom_path()
+
+plotly::ggplotly(p, tooltip = "text")
+```
+
+### GF
+
+```{r, echo=FALSE}
+print("critical value")
+qchisq(0.95, 1)
+print("count of year:species:sites")
+nrow(df_a)
+#df_a |> filter(GF > qchisq(0.95, 1))
+nrow(df_out)
+df_out |> dplyr::filter(GF > qchisq(0.95, 1))
+```
+
+### FSA: T v No
+
+
+```{r, echo=FALSE}
+ggplot(df_out, aes(x = T, y = No, group = as.factor(spp), colour = spp)) +
+  geom_point()
+```
+### sites with 4-5 passes and fish
+
+```{r, echo=F}
+df_all |>
+  group_by(Year, Species, Station) |>
+  mutate(pass_no = ifelse(max(Sweep )<=3, 3, 5)) |>
+  ungroup() |>
+  filter(pass_no == 5) |> 
+  group_by(Year, Species, Station, Sweep) |>
+  summarize(count = n()) |>
+  pivot_wider(names_from = Sweep, values_from = count, values_fill = 0) |>
+  mutate(percent4_5 = (sum(`4`, `5`)/sum(`1`, `2`, `3`)*100), 
+         percent4 = (sum(`4`)/sum(`1`, `2`, `3`)*100),
+         diff = sum(`1`, `2`, `3`) - sum(`1`, `2`, `3`, `4`)
+         )
+```
+
+### p v T
+```{r, echo=FALSE}
+n <- 100
+p <- 0.5
+
+c1 <- p*n
+c2 <- (n-c1)*p
+c3 <- (n- c1-c2)*p
+T <- sum(c1, c2, c3)
+
+p_vec <- seq(0.01, 1, 0.01)
+T_vec <- rep(NA, length(p_vec))
+
+i <- 2
+for(i in seq_along(p_vec)){
+  c1 <- p_vec[i]*n
+  c2 <- (n-c1)*p_vec[i]
+  c3 <- (n- c1-c2)*p_vec[i]
+  T_vec[i] <- sum(c1, c2, c3)
+}
+
+plot(p_vec, T_vec, type = 'n')
+lines(p_vec, T_vec)
+abline(h=90)
+```
+
+
+Perhaps graph the 4-5 pass sites - its a key bit of evidences
+
+
+# References
