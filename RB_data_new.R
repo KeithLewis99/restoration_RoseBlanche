@@ -257,20 +257,25 @@ library(readxl)
 area_2001 <- read_excel("../data/Rose Blanche - EF Site Dimensions.xls", 
            sheet = "August 2001", 
            range = "A3:D13") |>
-  rename(site = ...1)
-area_2001$year <- 2001
+  rename(Station = ...1, Area = area)
+area_2001$Year <- 2001
 
 df_area <- df_all |>
   group_by(Year, Station) |>
-  summarise(Area = first(Area))
+  summarise(Area = first(Area)) |>
+  filter( Year != 2001)
 
-df_area <- left_join(df_area, area_2001[, c(1, 4, 5)], by = c("Year" = "year", "Station" = "site", "Area" = "area"))
+df_area <- rbind(df_area, area_2001[, c(5, 1, 4)]) |>
+  arrange(Year)
+df_area |> print(n = Inf)
 
 df_a <- left_join(df_a, df_area, by = c("Year", "Station"))
 
 df_a <- df_a |>
   group_by(Year, Species, Station) |>
   mutate(abun.stand = abun/Area*100, bio.stand = bio/Area*100) #
+
+
 
 ## lat-long ----
 df_loc <- read.csv("../data/waypoints_RB.csv")
@@ -471,85 +476,85 @@ write.csv(df_tab3, "data_derived/df_tab3.csv")
 
 # pool ----
 # pool by Year and Station - this is for the Cote method
-df_tab_pool <- df_tab2 |>
-  group_by(Year, Station) |>
-  summarise(`1` = sum(`1`, na.rm = T), 
-            `2` = sum(`2`, na.rm = T), 
-            `3` = sum(`3`, na.rm = T),
-            `4` = sum(`3`, na.rm = T),
-            `5` = sum(`3`, na.rm = T))
-df_tab_pool |> print(n = Inf)
-
-df_tab_pool_spc <- df_sum |>
-  group_by(Year, Station, Sweep) |>
-  summarise(bio.sum = sum(bio.sum), abun = sum(abun)) |>
-  mutate(spc = case_when(
-    Sweep == 1 ~ 0,
-    Sweep == 2 ~ abun[Sweep ==1],
-    Sweep == 3 ~ sum(c(abun[Sweep == 1 | Sweep == 2])),
-    Sweep == 4 ~ sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3])),
-    Sweep == 5 ~ sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3 | Sweep == 4]))
-  ))
-df_tab_pool_spc
-
-p <- ggplot(
-  df_tab_pool_spc,
-  aes(x = spc, y = abun, 
-      group = Station, fill = Station,
-      text = paste("SPC: ", spc, "\n",
-                   "Abund: ", abun, "\n",
-                   "Stn: ", Station, "\n",
-                   "Sweep: ", Sweep,
-                   sep = "")
-  )) +
-  geom_point() +
-  geom_path() +
-  facet_grid(Year ~ Station)
-
-p
-
-
-
-# for analysis
-tmp1 <- 
-  df_tab1 |>
-  group_by(Year, Species, Station) |>
-  pivot_longer(
-    cols = starts_with("abun"),
-    values_to = "abun") |>
-  summarize(abun = sum(abun, na.rm = T))
-
-tmp2 <- 
-  df_tab1 |>
-  group_by(Year, Species, Station) |>
-  pivot_longer(
-    cols = starts_with("bio"),
-    values_to = "bio") |>
-  summarize(bio = sum(bio, na.rm = T))
-
-# df_a for analysis
-df_a <- full_join(tmp1, tmp2, by = c("Year", "Species", "Station"))
-df_a |> print(n = Inf)
-str(df_a, give.attr=F)
-# df_a$time <- NA
-# df_a$type <- NA
+# df_tab_pool <- df_tab2 |>
+#   group_by(Year, Station) |>
+#   summarise(`1` = sum(`1`, na.rm = T), 
+#             `2` = sum(`2`, na.rm = T), 
+#             `3` = sum(`3`, na.rm = T),
+#             `4` = sum(`3`, na.rm = T),
+#             `5` = sum(`3`, na.rm = T))
+# df_tab_pool |> print(n = Inf)
 # 
+# df_tab_pool_spc <- df_sum |>
+#   group_by(Year, Station, Sweep) |>
+#   summarise(bio.sum = sum(bio.sum), abun = sum(abun)) |>
+#   mutate(spc = case_when(
+#     Sweep == 1 ~ 0,
+#     Sweep == 2 ~ abun[Sweep ==1],
+#     Sweep == 3 ~ sum(c(abun[Sweep == 1 | Sweep == 2])),
+#     Sweep == 4 ~ sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3])),
+#     Sweep == 5 ~ sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3 | Sweep == 4]))
+#   ))
+# df_tab_pool_spc
+# 
+# p <- ggplot(
+#   df_tab_pool_spc,
+#   aes(x = spc, y = abun, 
+#       group = Station, fill = Station,
+#       text = paste("SPC: ", spc, "\n",
+#                    "Abund: ", abun, "\n",
+#                    "Stn: ", Station, "\n",
+#                    "Sweep: ", Sweep,
+#                    sep = "")
+#   )) +
+#   geom_point() +
+#   geom_path() +
+#   facet_grid(Year ~ Station)
+# 
+# p
+# 
+# 
+# 
+# # for analysis
+# tmp1 <- 
+#   df_tab1 |>
+#   group_by(Year, Species, Station) |>
+#   pivot_longer(
+#     cols = starts_with("abun"),
+#     values_to = "abun") |>
+#   summarize(abun = sum(abun, na.rm = T))
+# 
+# tmp2 <- 
+#   df_tab1 |>
+#   group_by(Year, Species, Station) |>
+#   pivot_longer(
+#     cols = starts_with("bio"),
+#     values_to = "bio") |>
+#   summarize(bio = sum(bio, na.rm = T))
+# 
+# # df_a for analysis
+# df_b <- full_join(tmp1, tmp2, by = c("Year", "Species", "Station"))
+# df_b |> print(n = Inf)
+# str(df_b, give.attr=F)
+# # df_a$time <- NA
+# # df_a$type <- NA
+# # 
+# # df_a <- df_a |>
+# #   mutate(time = if_else(Year == 1990, "before", "after")) |>
+# #   mutate(type = if_else(Station == "6"|Station == "7", "above", "below"))
+# 
+# # from RoseBlancheAug2001bysite.xlsx - these are in order by station so Station 1 == 221, and Station 10 == 413
+# station <- c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
+# area <- c(221, 216, 432, 361, 340, 239, 237, 252, 311, 413)
+# 
+# df_area <- data.frame(station, area)
+# str(df_area)
+# df_area$station <- as.numeric(df_area$station)
+# 
+# # join dataframes
+# df_a <- left_join(df_a, df_area, by = c("Station" = "station"))
 # df_a <- df_a |>
-#   mutate(time = if_else(Year == 1990, "before", "after")) |>
-#   mutate(type = if_else(Station == "6"|Station == "7", "above", "below"))
-
-# from RoseBlancheAug2001bysite.xlsx - these are in order by station so Station 1 == 221, and Station 10 == 413
-station <- c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
-area <- c(221, 216, 432, 361, 340, 239, 237, 252, 311, 413)
-
-df_area <- data.frame(station, area)
-str(df_area)
-df_area$station <- as.numeric(df_area$station)
-
-# join dataframes
-df_a <- left_join(df_a, df_area, by = c("Station" = "station"))
-df_a <- df_a |>
-  group_by(Year, Species, Station) |>
-  mutate(abun.stand = abun/area, bio.stand = bio/area)
-
-# END ----
+#   group_by(Year, Species, Station) |>
+#   mutate(abun.stand = abun/area, bio.stand = bio/area)
+# 
+# # END ----
