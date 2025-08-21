@@ -3,8 +3,7 @@
 ## using kable() and kableExtra() - see website: https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html#Grouped_Columns__Rows
 
 df_a <- read.csv("data_derived/df_a3.csv")
-
-
+df_a |> filter(Year == 2001) 
 # density - CI ----
 
 # Hmisc - ben bolker approach
