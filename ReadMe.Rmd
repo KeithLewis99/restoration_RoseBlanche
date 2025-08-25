@@ -13,7 +13,7 @@ bibliography: refs/references.bib
 knitr::opts_chunk$set(echo = TRUE)
 
 df_all <- read.csv("data_derived/df_all.csv")
-df_tab3 <- read.csv("data_derived/df_tab3.csv")
+df_tab2 <- read.csv("data_derived/df_tab2.csv")
 df_a <- read.csv("data_derived/df_a3.csv")
 df_out <- read.csv("data_derived/FSA_output.csv")
 df_sum_subset <- read.csv("data_derived/spc_example.csv")
@@ -90,19 +90,17 @@ The below will follow the format of the Pamehac study.  See Pamehac and Granite 
 **check the below**
 SD = sweep disaggreated, SA = sweep aggregated
 - ls_rb: list of electrofishing files in the Pamehac directory; SD  
-- df_all: take ls_pam and make a dataframe; clean it up; SD  
-- df_sum: from df_all, calculate biomass and abundance for each sweep; SD  
+- df_all: take ls_rb and make a dataframe; this includes **American Eels**; SD  
+- df_sum: from df_all without **American Eel**, calculate biomass and abundance for each sweep; SD  
 - df_grid: create a grid with all possible rows for Year, Station, Species, and Sweep - this is to take care of the "no line when no fish of a given species is caught" problem; SD  
-df_grid1: take out the structural zeros; SD  
-- df_all1: join df_grid1 with df_sum to make a complete data set; SD  
-- df_all2: join df_all1 with df_stn_tag (max sweeps per year) to remove extra sweeps; replace NA's with zeros; calculate spc; SD  
-- df_a: Sweeps < 3; sum abundance and biomass; SA; df_a2: add area; df_a3: add location  
-- df_a1: this may be a relic
+df_grid1: take out the structural zeros; assume that 5 sweeps were conducted in 2000 but only 4 in later years.  Anything below the max for a year is a real zero, not a structural one; SD  
+- df_all1: join df_grid1 with df_sum to make a complete data set, i.e., real zeros but no structural ones; SD  
+- df_all2: join df_all1 with df_stn_tag (max sweeps per year) to have a max sweep column - not really used much; **replace NA's with zeros**; calculate spc (spc calculations are accurate); SD  
+- df_a (object in R, add a number to csv files): Sweeps < 3; sum abundance and biomass; SA; df_a3: add area and standardize abund/bio; add location  
 - df_tab1: tabular format of abundance and biomass, Sweep <= 3; SA  
 - df_tab2: tabular format of abundance and biomass, all Sweeps; SA  
-- df_tab3: tabular format of abundance and biomass, all Sweeps whether fish or not
 - df_tab_T: sum by species and year; tabular format
-- df_tab_T1: as above but with sweeps  
+
 
 ## map
 ```{r, map, echo = F}
@@ -115,7 +113,7 @@ tmp <- read.csv("../data/waypoints_RB.csv") |>
          )
 library(leaflet)
 leaflet()%>%
-   setView(lng = -58.7,lat=47.64,zoom=11)%>%addTiles()%>%
+   setView(lng = -58.7,lat=47.64,zoom=12)%>%addTiles()%>%
    addCircleMarkers(data=tmp, lng=tmp$west, lat=tmp$north,
                     popup = ~sites,
                     label = ~sites,
@@ -139,8 +137,8 @@ See restoration Granite Readme.qmd and Pamehac Readme.Rmd, especially the What H
 ### data summaries
 ```{r}
 nrow(df_all) # number of fish caught
-sum(rowSums(!is.na(df_tab3[,4:8]))) # number of sites sampled assuming 5 passes in 1990, 1991, 1996 and 3 in 1992 and 2016, including sweeps with abun == 0
-nrow(df_tab3) # number of site:species:years including sweeps with abun == 0; assumes previous is true
+sum(rowSums(!is.na(df_tab2[,4:8]))) # number of sites sampled assuming 5 passes in 2000,  and 4 in 2001,2002, and 2015, including sweeps with abun == 0
+nrow(df_tab2) # number of site:species:years including sweeps with abun == 0; assumes previous is true
 nrow(df_a) # number of site:species:years that can be used in FSA
 nrow(df_out)
 ```
@@ -148,15 +146,15 @@ nrow(df_out)
 ### low n
 ```{r}
 
-nrow(df_a |> filter(T < 30)) # 97 of 124
-nrow(df_a |> filter(T < 20)) # 85 of 124
-nrow(df_a |> filter(T < 10)) # 57 of 124
-nrow(df_a |> filter(T < 5)) # 33 of 124
+nrow(df_a |> filter(abun < 30)) # 150 of 160
+nrow(df_a |> filter(abun < 20)) # 135 of 160
+nrow(df_a |> filter(abun < 10)) # 109 of 160
+nrow(df_a |> filter(abun < 5)) # 79 of 160
 
-nrow(df_out |> filter(T < 30)) # 97 of 124
-nrow(df_out |> filter(T < 20)) # 85 of 124
-nrow(df_out |> filter(T < 10)) # 57 of 124
-nrow(df_out |> filter(T < 5)) # 33 of 124
+nrow(df_out |> filter(T < 30)) # 150 of 160
+nrow(df_out |> filter(T < 20)) # 135 of 160
+nrow(df_out |> filter(T < 10)) # 109 of 160
+nrow(df_out |> filter(T < 5)) # 79 of 160
 ```
 
 ### spc
@@ -183,9 +181,11 @@ print("critical value")
 qchisq(0.95, 1)
 print("count of year:species:sites")
 nrow(df_a)
-#df_a |> filter(GF > qchisq(0.95, 1))
-nrow(df_out)
-df_out |> dplyr::filter(GF > qchisq(0.95, 1))
+nrow(df_out) # 160
+nrow(df_out |> filter(GF < qchisq(0.95, 1))) # 90 of 160 (56%)
+nrow(df_out |> filter(GF >= qchisq(0.95, 1))) # 17 of 160 (11%)
+nrow(df_out |> filter(is.na(GF))) # 53 of 160 (33%)
+
 ```
 
 ### FSA: T v No
@@ -238,8 +238,10 @@ lines(p_vec, T_vec)
 abline(h=90)
 ```
 
-
-Perhaps graph the 4-5 pass sites - its a key bit of evidences
+### Summary/conclusions
+- Lots of very low catches, very few over 30  
+- Lots of sites with GF > GF crit  
+- Few fish caught after 4-5 passes
 
 
 # References
