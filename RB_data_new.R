@@ -60,10 +60,12 @@ df_all <- bind_rows(ls_rb)
 unique(df_all$Site)
 str(df_all)
 
-write.csv(df_all, "data_derived/df_all.csv")
+## note that there is no area for 2001 - this gets added below in "area"
+## 1599 records
+# write.csv(df_all, "data_derived/df_all.csv")
 
 # standardize data across years
-##
+## remove EEL
 df_all <- df_all |>
   filter(Species != "EEL")
 
@@ -77,7 +79,8 @@ df_sum <- df_all |>
             ) 
 str(df_sum, give.attr = F)
 
-write.csv(df_sum, "data_derived/df_sum.csv")
+# 313 records
+# write.csv(df_sum, "data_derived/df_sum.csv")
 
 # grid ----
 # create dataset with all possible combinations of the following variables
@@ -94,7 +97,7 @@ df_grid <- expand.grid(Year = year,
   arrange(Year, Species, Station, Sweep)
 #str(df_grid)
 
-write.csv(df_grid, "data_derived/df_grid.csv")
+# write.csv(df_grid, "data_derived/df_grid.csv")
 
 # edit grid ----
 
@@ -108,7 +111,7 @@ df_sweep <- df_sum |>
 
 
 # edit grid
-# remove the structural zeros, i.e., sites that weren't fished
+# remove the structural zeros, i.e., sites that weren't fished; assume that 5 sweeps were conducted in 2000 but only 4 in later years.  Anything below the max for a year is a real zero, not a structural one.
 df_grid1 <- df_grid |>
   filter(!(Year == 2001 & Sweep == 5) &
            !(Year == 2002 & Sweep == 5) &
@@ -118,48 +121,53 @@ df_grid1 <- df_grid |>
 #str(df_grid1, give.attr = F)
 df_grid1$Year <- as.integer(as.character(df_grid1$Year))
 df_grid1$Sweep <- as.integer(df_grid1$Sweep)
-write.csv(df_grid1, "data_derived/df_grid1.csv")
-#str(df_sum, give.attr = F)
+# write.csv(df_grid1, "data_derived/df_grid1.csv")
+#str(df_grid1, give.attr = F) # 680 records
 
 
 # join grid and summary ----
-# now, join the two dataframes - sites with no fish caught are NA
+# now, join the two dataframes - sites with no fish caught are NA; 680 records
 df_all1 <- full_join(df_grid1, df_sum[, 1:6], by = c("Year", "Species", "Station", "Sweep")) |>
   arrange(Year, Species, Station, Sweep)
 #str(df_all1, give.attr = F)
 nrow(df_all1 |> filter(Sweep > 3)) # 202 rows with Sweep > 3 
 
-write.csv(df_all1, "data_derived/df_all1.csv")
+# write.csv(df_all1, "data_derived/df_all1.csv")
 
 # get max Sweep ----
 # this is for below where I remove the extra sweeps
+## its really a redundant step - not needed but not changing it just to make sure i'm not pulling out a critical thread needed somewhere else.
 df_stn_tag <- df_all1 |>
   group_by(Year) |>
   filter(!is.na(abun)) |>
   summarise(tag = max(Sweep)) |>
   print(n = Inf)
 
-# this may be redundant with above
-df_stn_tag_all <- df_all1 |>
-  group_by(Year, Station) |>
-  filter(!is.na(abun)) |>
-  summarise(tag = max(Sweep)) |>
-  print(n = Inf)
-plot(density(df_stn_tag_all$tag))
-
-
-# join all and tags
+# # this may be redundant with above
+# df_stn_tag_all <- df_all1 |>
+#   group_by(Year, Station) |>
+#   filter(!is.na(abun)) |>
+#   summarise(tag = max(Sweep)) |>
+#   print(n = Inf)
+# plot(density(df_stn_tag_all$tag))
+# 
+# 
+# # join all and tags
 df_all2 <- full_join(df_all1, df_stn_tag, by = c("Year")) |>
   arrange(Year, Species, Station, Sweep) |>
   filter( Sweep <= tag) #!is.na(abun) &
-str(df_all2, give.attr = F)
-df_all2$Area[is.na(df_all2$Area)]
+# str(df_all2, give.attr = F)
+# df_all2$Area[is.na(df_all2$Area)]
 
-# replace NA with zero
+
+## NA -> zero ----
 df_all2 <- df_all2 |>
   replace_na(list(bio.sum = 0, abun = 0)) 
 
-write.csv(df_all2, "data_derived/df_all2.csv")
+df_all2 <- df_all1 |>
+  replace_na(list(bio.sum = 0, abun = 0)) 
+
+# write.csv(df_all2, "data_derived/df_all2.csv") # 680 records
 
 
 
@@ -181,7 +189,7 @@ df_all2 <- df_all2 |>
   ))
 
 #View(arrange(df_all2, Year, Station,  Sweep, Species))
-str(df_all2, give.attr = F)
+# str(df_all2, give.attr = F)
 
 
 ## spc plot ----
@@ -220,10 +228,9 @@ p <- ggplot(
   )) +
   geom_point() +
   geom_path()
-
 p
 
-write.csv(df_all2[df_all2$Species == "AS" & df_all2$Year == 2016,], "data_derived/spc_example.csv")
+# write.csv(df_all2[df_all2$Species == "AS" & df_all2$Year == 2015,], "data_derived/spc_example.csv") # 40 records
 plotly::ggplotly(p, tooltip = "text")
 
 
@@ -234,7 +241,7 @@ df_a <- df_all2 |>
   summarise(abun = sum(abun),
             bio = sum(bio.sum))
 
-write.csv(df_a, "data_derived/df_a.csv")
+# write.csv(df_a, "data_derived/df_a.csv")
 
 
 
@@ -242,9 +249,8 @@ write.csv(df_a, "data_derived/df_a.csv")
 df_a$type <- NA
 
 df_a <- df_a |>
-  mutate(type = if_else(Station >= "8", "con", "trt"))
+  mutate(type = if_else(Station >= 8, "con", "trt"))
 df_a$type <- as.factor(df_a$type)
-
 str(df_a, give.attr=FALSE)  
 
 
@@ -286,11 +292,12 @@ df_loc <- df_loc |>
              Site == "Site rbc4" |
              Site == "Rbmaim9tp")
          )
-
 df_a <- left_join(df_a, df_loc[, 2:4], by = c("Station" = "sites")) 
 
 str(df_a, give.attr=F)
-write.csv(df_a, "data_derived/df_a3.csv")
+df_a$Station <- as.factor(df_a$Station)
+df_loc$sites <- as.factor(df_loc$sites)
+# write.csv(df_a, "data_derived/df_a3.csv")
 
 
 
@@ -326,26 +333,12 @@ df_sum |> group_by(Year, Species, Station) |>
   ungroup() |>
   summarise(tot = n())
 
-df_a |> group_by(Year, Species, Station) |> 
-  summarise (catch_num = n()) |> 
-  ungroup() |>
-  summarise(tot = n())
-
-
-# zeros - 17 of these
-df_sum |>
-  filter(Sweep == 1 & abun == 0)
+# zeros - 31 of these
 df_a |>
   filter(abun == 0)
 
 
 ## tables ----
-with(df_all2, table(Station, Species))
-with(df_all2, table(Station, Sweep, Species))
-with(df_all2, table(Station, Sweep, Species, Year))
-with(df_all2[df_all2$Year == 2015,], table(Station, Sweep, Species, Year))
-
-
 ## number of sweeps per station
 df_sum |>
   group_by(Year, Species, Station) |>
@@ -359,12 +352,16 @@ df_all2$pass_no <-NA
 # summarize just 4-5-pass sites and had fish
 df_4_5pass <- df_all2 |>
   group_by(Year, Species, Station) |>
-  mutate(pass_no = ifelse(max(Sweep )<=3, 3, 5)) |>
+#  mutate(pass_no = ifelse(max(Sweep )<=3, 3, 5)) |>
+  mutate(pass_no = ifelse(Sweep <=3, 3, 5)) |>
   ungroup() |>
   filter(pass_no == 5) |> 
   group_by(Year, Species, Station, Sweep) |>
-  summarize(count = n()) |>
-  pivot_wider(names_from = Sweep, values_from = count, values_fill = 0)
+#  summarize(count = n()) |>
+  # pivot_wider(names_from = Sweep, values_from = count, values_fill = 0)
+  filter(abun > 0) |>
+  pivot_wider(names_from = Sweep, values_from = abun, values_fill = 0)
+df_4_5pass |> print(n = Inf)
 
 str(df_4_5pass, give.attr = F)
 
@@ -375,7 +372,8 @@ str(df_4_5pass, give.attr = F)
 
 df_tab1 <- df_all2 |>
   group_by(Year, Species, Station) |>
-  filter(length(Sweep) > 1 & Sweep <= 3) |>
+  #filter(length(Sweep) > 1 & Sweep <= 3) |>
+  filter(Sweep <= 3) |>
   ungroup() |>
   pivot_wider(id_cols = c(Year, Species, Station),
               names_from = Sweep, values_from = c(abun, bio.sum)) |> 
@@ -384,11 +382,7 @@ df_tab1[df_tab1$Species == "BT" & df_tab1$Year == 2001,]
 
 df_tab1 |> print(n = Inf)
 
-df_tab1 |>
-  group_by(Station, Species, Year) |>
-  filter(Station %in% c("5", "5A", "5B", "8", "8A")) |> 
-  print(n = Inf)
-unique(df_tab1$Station)
+write.csv(df_tab1, "data_derived/df_tab1.csv")
 
 # temp is same as df_tab1 but without the last filter
 ## the query above does not get rid of stations with captures on Sweep 1 (or 2 or 3) & 4 or 5 (all three have captures on sweep 3)
@@ -402,7 +396,7 @@ df_tab2 <- df_all2 |>
               names_from = Sweep, values_from = abun) #bio.sum abun
 str(df_tab2, give.attr = F)
 #View(df_tab2)
-
+write.csv(df_tab2, "data_derived/df_tab2.csv")
 
 # 
 df_aj2 <- anti_join(df_tab2, df_tab1, by = c('Year', 'Species', 'Station'))
@@ -423,6 +417,7 @@ df_tab2 |>
             sum_c2 = sum(`2`, na.rm = T),
             sum_c3 = sum(`3`, na.rm = T)
   )
+
 
 df_sum |> group_by(Species) |> filter(Sweep ==4 | Sweep ==5) |> summarise(sum = sum(abun))
 
@@ -452,27 +447,27 @@ df_tab_T <- df_sum |>
               values_from = c(T, n)) 
 df_tab_T
 str(df_tab_T, give.attr = F)
-#write.csv(df_tab_T[, c(1, 6, 2, 7, 3, 8, 4, 9, 5)], "derived_data/df_tab_T.csv")
+# write.csv(df_tab_T[, c(1, 6, 2, 7, 3, 8, 4, 9, 5)], "data_derived/df_tab_T.csv")
 
-
-# this summary is for all sites that were fished irregardless of whether they had fish or not.  The assumption here is that there were X passes in 2000, 2001, 2002 ......  Scruton says minimum of X passes in .  
+### DEPRECATE
+# this summary is for all sites that were fished irregardless of whether they had fish or not.  The assumption here is that there were 5 passes in 2000, and 4 in 2001, 2002, and 2015.  
 #### this needs to be updated
-df_tab3 <- 
-  df_tab2 |>
-  mutate_at(c(5, 6), ~replace_na(.,0)) |>
-  mutate(`4` = case_when(
-    Year == 1990 | Year == 1991 | Year == 1996 
-    ~ ifelse(is.na(`4`), 0 , `4`))) |>
-  mutate(`5` = case_when(
-    Year == 1990 | Year == 1991 | Year == 1996 
-    ~ ifelse(is.na(`5`), 0 , `5`))) |> 
-  print(n = 140)
-#View(test)
-str(df_tab3, give.attr = F)
-nrow(df_tab3)
-#View(df_tab3 |> filter(!is.na(`1`)) |> count(`1`))
-sum(rowSums(!is.na(df_tab3[,4:8])))
-write.csv(df_tab3, "data_derived/df_tab3.csv")
+# df_tab3 <- 
+#   df_tab2 |>
+#   mutate_at(c(5, 6), ~replace_na(.,0)) |>
+#   mutate(`4` = case_when(
+#     Year == 1990 | Year == 1991 | Year == 1996 
+#     ~ ifelse(is.na(`4`), 0 , `4`))) |>
+#   mutate(`5` = case_when(
+#     Year == 1990 | Year == 1991 | Year == 1996 
+#     ~ ifelse(is.na(`5`), 0 , `5`))) |> 
+#   print(n = 140)
+# #View(test)
+# str(df_tab3, give.attr = F)
+# nrow(df_tab3)
+# #View(df_tab3 |> filter(!is.na(`1`)) |> count(`1`))
+# sum(rowSums(!is.na(df_tab3[,4:8])))
+# write.csv(df_tab3, "data_derived/df_tab3.csv")
 
 # pool ----
 # pool by Year and Station - this is for the Cote method
