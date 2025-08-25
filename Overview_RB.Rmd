@@ -1,0 +1,314 @@
+---
+title: "Overview-Rose_Blanche"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(kableExtra)
+library(magrittr)
+
+source("RB_fun.R")
+source("RB_tables.R")
+#source("GC_data_new.R")
+
+# library ----
+library(nlme)
+library(glmmTMB)
+library(DHARMa)
+library(readr)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+library(dplyr)
+
+#load data for CIs
+# create pattern
+temp = list.files(path = "output", pattern=".*_ci.csv$", full.names = T)
+
+# read all files in a folder that match a pattern and name each one
+name_files = function(x) {
+  name = gsub(".*output/", "", x)
+  name = gsub("_ci.csv", "", paste0(name, "_ci"))
+  return(name)
+}
+
+# create a list of dataframes, change the subscript to a name, extract as dataframes
+ls_sc_ci = (lapply(temp, read.csv))
+names(ls_sc_ci) <- name_files(temp)
+list2env(ls_sc_ci, envir = .GlobalEnv)
+
+```
+
+# Background
+
+
+Fourth time through and 
+
+
+
+BT {data-navmenu="Summary_all"}
+=====
+
+
+Column
+-----------------------------------------------------------------------
+
+### Density
+
+```{r}
+# created in mean_stderrors_andplots_KL.R and from glmm_anova.R
+knitr::include_graphics("output/BT_density.png")
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Biomass
+
+```{r}
+knitr::include_graphics("output/BT_biomass.png")
+```
+
+
+BTYOY {data-navmenu="Summary_all"}
+=====
+
+Column
+-----------------------------------------------------------------------
+
+### Density
+
+```{r}
+knitr::include_graphics("output/BTYOY_density.png")
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Biomass
+
+```{r}
+knitr::include_graphics("output/BTYOY_biomass.png")
+```
+
+AS {data-navmenu="Summary_all"}
+=====
+
+Column
+-----------------------------------------------------------------------
+
+### Density
+
+```{r}
+knitr::include_graphics("output/AS_density.png")
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Biomass
+
+```{r}
+knitr::include_graphics("output/AS_biomass.png")
+```
+
+
+
+ASYOY {data-navmenu="Summary_all"}
+=====
+
+Column
+-----------------------------------------------------------------------
+
+### Density
+
+```{r}
+knitr::include_graphics("output/ASYOY_density.png")
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Biomass
+
+```{r}
+knitr::include_graphics("output/ASYOY_biomass.png")
+```
+
+
+
+<!-- Summary_all -->
+<!-- Just CIs -->
+  
+BT {data-navmenu="Summary_CI"}
+=====
+
+
+Column
+-----------------------------------------------------------------------
+
+### Density
+
+```{r, echo=FALSE}
+kbl(bt_den_ci[1:3, c(2, 5, 3:4)], 
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "BT density CIs", digits = 3 ) |>
+  kable_paper()
+```
+Diagnostics: Homogeneity was a small issue.  Spatial resids show a pattern.  But we are JUST trying to show that there is a difference in MC and SC and that riffles and runs are the same. p-value way less than alpha - won't change the decision. 2025-07-08
+
+
+```{r, echo=FALSE}
+kbl(btyoy_den_ci[1:3, c(2, 5, 3:4)],
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "BTYOY density CIs", digits = 3 ) |>
+  kable_paper()
+```
+Diagnostics: Spatial resids fine; some problem with temp resids; rest look great; far from alpha. 2025-07-08
+
+
+Column
+-----------------------------------------------------------------------
+
+### Biomass
+
+```{r, echo=FALSE}
+kbl(bt_bio_ci[1:4, c(2, 5, 3:4)],
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "BT Biomass CIs", digits = 3 ) |>
+  kable_paper()
+```
+Diagnostics: There is definitely an east-west trend in the spatial resids.  resids all look fine except some waviness in the homogeneity.  But p-values are far from alpha. p-values are far from alpha so proceed. 2025-07-08
+
+
+```{r, echo=FALSE}
+kbl(btyoy_bio_ci[1:4, c(2, 5, 3:4)],
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "BTYOY Biomass CIs", digits = 3 ) |>
+  kable_paper()
+```
+Diagnostics: Spatial resids are fine.  resids look great although slight trend in homogeneity - proceed. 2025-07-08. P-value far from alpha. Proceed. 2025-07-08.
+
+
+AS {data-navmenu="Summary_CI"}
+=====
+
+
+Column
+-----------------------------------------------------------------------
+
+### Density
+
+```{r, echo=FALSE}
+kbl(as_den_ci[1:3, c(2, 5, 3:4)],
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "AS density CIs", digits = 3 ) |>
+  kable_paper()
+```
+Diagnostics: Resids look great; Spatial resids fine; but very close to alpha for the trt - interpret cautiously. 2025-07-08
+
+```{r, echo=FALSE}
+kbl(asyoy_den_ci[1:4, c(2, 5, 3:4)],
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "ASYOY density CIs", digits = 3 ) |>
+  kable_paper()
+```
+Diagnostics: Resids look generally good.  Spatial resids fine; problems with the temp resids.  trt is not close to alpha but type is.  Interpret cautiously for type. 2025-07-08
+
+
+Column
+-----------------------------------------------------------------------
+
+### Biomass
+
+```{r, echo=FALSE}
+kbl(as_bio_ci[1:3, c(2, 5, 3:4)],
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "AS Biomass CIs", digits = 3 ) |>
+  kable_paper()
+```
+Diagnostics: Residuals look fine as are temporal resids. Spatial resids fine; proceed; 2025-07-08.
+
+```{r, echo=FALSE}
+kbl(asyoy_bio_ci[1:4, c(2, 5, 3:4)],
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "ASYOY Biomass CIs", digits = 3 ) |>
+  kable_paper()
+```
+Diagnostics: Spatial resids fine; some trends in resids but p-value far from alpha for treat.  Type may differ but treat with caution due to proximity to alpha and resid issues. ; 2025-07-08
+
+
+
+Parameter CI
+=====
+
+
+Column
+-----------------------------------------------------------------------
+
+
+```{r gc tab, echo=FALSE}
+kbl(tabC[, c(1:2, 9,10)], 
+    col.names = c('Species-age', 'Parameter', 'Density',
+                  'Biomass'),
+    align = 'c', caption = "Density and Biomass CIs", digits = 3 ) |>
+  collapse_rows(valign = "top",
+                latex_hline = "major") |>
+  add_header_above(header = c(" " = 2, "Density" = 1, "Biomass" = 1)) |>
+  #add_header_above(header = c(" " = 2, "Summer" = 6)) |>
+  kable_paper()
+```
+
+
+
+Density CI Table 
+=====
+
+
+Column
+-----------------------------------------------------------------------
+
+
+```{r den tab ci, echo=FALSE}
+kbl(all_den_ci_tabC,
+    col.names = c('spp', 'type',
+                  '2000',
+                  '2001',
+                  '2002',
+                  '2016',
+                  'total'),
+    align = 'c', caption = "Density CIs", digits = 2 ) |>
+  collapse_rows(valign = "top",
+                latex_hline = "major") |>
+  add_header_above(header = c(" " = 2, "Year" = 5)) |>
+  kable_paper()
+```
+
+
+Biomass CI Table 
+=====
+
+
+Column
+-----------------------------------------------------------------------
+
+
+```{r bio tab ci, echo=FALSE}
+kbl(all_bio_ci_tabC,
+    col.names = c('spp', 'type',
+                  '2000',
+                  '2001',
+                  '2002',
+                  '2015',
+                  'total'),
+    align = 'c', caption = "Biomass CIs", digits = 2 ) |>
+  collapse_rows(valign = "top",
+                latex_hline = "major") |>
+  add_header_above(header = c(" " = 2, "Year" = 5)) |>
+  kable_paper()
+
+```
