@@ -1,9 +1,84 @@
+# This was supposed to JUST create a table for the parameter estimates much like what I did in Seal Cove.  However, after the decision to just compare GC to other sites, I added tables that summarize the density/biomass by species per year. 
+
+## Param CIs and Bootstrapped CIs
+### Density
+
+# load files ----
+# create pattern
+temp1 = list.files(path = "output", pattern=".*_ci.csv$", full.names = T)
+
+# read all files in a folder that match a pattern and name each one
+name_files = function(x) {
+  name = gsub(".*output/", "", x)
+  name = gsub("_ci.csv", "", paste0(name, "_ci"))
+  return(name)
+}
+
+# create a list of dataframes, change the subscript to a name, extract as dataframes
+ls_sc_ci1 = (lapply(temp1, read.csv))
+names(ls_sc_ci1) <- name_files(temp1)
+list2env(ls_sc_ci1, envir = .GlobalEnv)
+
+bt_den_ci$species <- "BT"
+btyoy_den_ci$species <- "BTYOY"
+as_den_ci$species <- "AS"
+asyoy_den_ci$species <- "ASYOY"
+
+tab_den <- rbind(bt_den_ci[1:3,-1], btyoy_den_ci[1:3,-1], as_den_ci[1:3, -1], asyoy_den_ci[1:3, -1])
+
+bt_bio_ci$species <- "BT"
+btyoy_bio_ci$species <- "BTYOY"
+as_bio_ci$species <- "AS"
+asyoy_bio_ci$species <- "ASYOY"
+
+tab_bio <- rbind(bt_bio_ci[1:3,-1], btyoy_bio_ci[1:3,-1], as_bio_ci[1:3, -1], asyoy_bio_ci[1:3, -1])
+
+tab <- cbind(tab_den, tab_bio[, 2:4])
+tab$parm[tab$parm == "cond.(Intercept)"] <- "Int"
+tab$parm[tab$parm == "cond.trtsc"] <- "Trt"
+tab$parm[tab$parm == "cond.typerun"] <- "Type"
+
+library(kableExtra)
+kbl(tab[, c(5, 1, 4, 2:3, 8, 6:7)], 
+    col.names = c('spp', 'parm', 'Estimate', '2.5%', '97.5%',
+                  'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "Density and Biomass CIs", digits = 3 ) |>
+  collapse_rows(valign = "top",
+                latex_hline = "major") |>
+  add_header_above(header = c(" " = 2, "Density" = 3, "Biomass" = 3)) |>
+  add_header_above(header = c(" " = 2, "Summer" = 6)) |>
+  kable_paper()
+
+
+tabC <- tab[, c(5, 1, 4, 2:3, 8, 6:7)]
+tabC$ci_den <- paste(round(tabC$Estimate, 2), 
+                     "(", 
+                     round(tabC$X2.5., 2), 
+                     round(tabC$X97.5., 2), 
+                     ")")
+tabC$ci_bio <- paste(round(tabC$Estimate.1, 2), 
+                     "(", 
+                     round(tabC$X2.5..1, 2), 
+                     round(tabC$X97.5..1, 2), 
+                     ")")
+
+kbl(tabC[, c(1:2, 9,10)], 
+    col.names = c('Species-age', 'Parameter', 'Density',
+                  'Biomass'),
+    align = 'c', caption = "Density and Biomass CIs", digits = 3 ) |>
+  collapse_rows(valign = "top",
+                latex_hline = "major") |>
+  add_header_above(header = c(" " = 2, "Density" = 1, "Biomass" = 1)) |>
+  #add_header_above(header = c(" " = 2, "Summer" = 6)) |>
+  kable_paper()
+
+
 # The below is tables and bootstrapped values to get CIs around density and biomass estimates that don't overlap zero.  
 
 ## using kable() and kableExtra() - see website: https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html#Grouped_Columns__Rows
 
 df_a <- read.csv("data_derived/df_a3.csv")
-df_a |> filter(Year == 2001) 
+
 # density - CI ----
 
 # Hmisc - ben bolker approach
