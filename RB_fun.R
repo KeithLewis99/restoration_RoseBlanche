@@ -1,3 +1,5 @@
+# Functions for Rose Blanche - note that I haven't done ROxygen for all of these nor have all been converted to RB.
+
 tab_type <- function(df, species, metric){
   #browser()
   df_sum <- df |>
@@ -139,6 +141,65 @@ tab.ci <- function(df, name){
   write.csv(df_ciout, paste0("output/", name, "_ci.csv"))
 }
 
+#' control_impact_year
+#'
+#' @param df dataframe of year, type, time, abundance
+#' @param z filter variable: response variable - density or biomass, density == "d", biomass == "b"
+#'
+#' @return
+#' @export
+#'
+#' @examples
+control_impact_year <- function(df, z, leg){
+  # browser()
+  p1 <- ggplot(df, aes(x = as.factor(Year), y = exp(fit), fill = type, colour = type)) + 
+    # geom_point(position = position_dodge(width = 0.5), size = 3) +
+    geom_point(position = position_jitterdodge(
+      jitter.width = 0.8,
+      dodge.width = 1, 
+      seed = 123),
+      size = 2) +
+    
+    #facet_wrap(~Species) + 
+    theme_bw() + 
+    {if (z == "b"){
+      ylab(expression("Biomass Estimate (g/m" ^2*")"))
+    } else if (z == "d"){
+      ylab(expression("Density Estimate (#/100 m" ^2*")"))
+    } else if (z == "n"){
+      theme(axis.title.y = element_blank())
+    }
+    } +
+    xlab("Year") +
+    # geom_errorbar(aes(ymax = exp(fit+se.fit*1.96), ymin = exp(fit-se.fit*1.96)), linewidth=1, width=0.15, position=position_dodge(0.5)) +
+    geom_pointrange(aes(ymax = exp(fit+se.fit*1.96),
+                      ymin = exp(fit-se.fit*1.96)),
+                  linewidth=1, width=0,
+                  position = position_jitterdodge(
+                    jitter.width = 0.8,
+                    dodge.width = 1,
+                    seed = 123)
+                  ) +
+    # geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
+    # geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
+    # geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
+    #theme(legend.title=element_blank()) +
+    {if(leg == "y") {
+      theme(legend.position=c(.9, .85))
+    } else if(leg == "n"){
+      theme(legend.position="none")
+    }
+    } +
+    scale_fill_discrete(name="",
+                        breaks=c("con", "trt"),
+                        labels=c("Control", "Treatment")) +
+    scale_colour_manual(values=c("black", "dark grey"),
+                        name="",
+                        breaks=c("con", "trt"),
+                        labels=c("Control", "Treatment")) 
+  #theme(legend.position=c(.85, .88))
+  return(p1)
+}
 
 
 

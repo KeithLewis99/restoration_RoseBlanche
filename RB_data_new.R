@@ -32,11 +32,11 @@ library(ggplot2)
 
 
 # import ----
-# import files in catch and convert to proper format
-#create a pattern and bind directory to pattern
+## import files in catch and convert to proper format
+## create a pattern and bind directory to pattern
 temp = list.files(path = "../data/RB_year/", pattern="RoseBlanche.*bysite.csv$", full.names = T)
 
-# import files as a list
+## import files as a list
 ls_rb = (lapply(temp, read.csv))
 str(ls_rb)
 str(ls_rb,1)
@@ -46,7 +46,7 @@ unique(ls_rb[1]$`2000`$Species)
 # standardize names
 names(ls_rb) <- c("2000", "2001", "2002", "2015")
 
-# make all classes the same for each variable across lists
+## make all classes the same for each variable across lists
 ls_rb[["2000"]]$Fish.ID <- as.integer(ls_rb[["2000"]]$Fish.ID)
 ls_rb[["2000"]]$Weight.g <- as.numeric(ls_rb[["2000"]]$Weight.g)
 ls_rb[['2001']] <- ls_rb[["2001"]][,1:8]
@@ -54,8 +54,8 @@ ls_rb[['2001']] <- ls_rb[["2001"]][,1:8]
 ls_rb[["2015"]]$Station <- as.numeric(regmatches(ls_rb[["2015"]]$Station, regexpr("\\d+", ls_rb[["2015"]]$Station)))
 str(ls_rb)
 
-# create either a large dataframe and then do some summaries
-# as above, create summaries for FSA
+## create either a large dataframe and then do some summaries
+## as above, create summaries for FSA
 df_all <- bind_rows(ls_rb)
 unique(df_all$Site)
 str(df_all)
@@ -70,7 +70,7 @@ df_all <- df_all |>
   filter(Species != "EEL")
 
 
-# sum previous catch ----
+# sum catch ----
 ## first, create a table for T
 df_sum <- df_all |>
   group_by(Year, Species, Station, Sweep) |>
@@ -134,7 +134,8 @@ nrow(df_all1 |> filter(Sweep > 3)) # 202 rows with Sweep > 3
 
 # write.csv(df_all1, "data_derived/df_all1.csv")
 
-# get max Sweep ----
+# sum previous catch----
+## get max Sweep ----
 # this is for below where I remove the extra sweeps
 ## its really a redundant step - not needed but not changing it just to make sure i'm not pulling out a critical thread needed somewhere else.
 df_stn_tag <- df_all1 |>
@@ -160,7 +161,7 @@ df_all2 <- full_join(df_all1, df_stn_tag, by = c("Year")) |>
 # df_all2$Area[is.na(df_all2$Area)]
 
 
-## NA -> zero ----
+## NA to zero ----
 df_all2 <- df_all2 |>
   replace_na(list(bio.sum = 0, abun = 0)) 
 
@@ -170,10 +171,9 @@ df_all2 <- df_all1 |>
 # write.csv(df_all2, "data_derived/df_all2.csv") # 680 records
 
 
-
+## spc ----
 # calculate sum of previous catch
 df_all2$spc <- NA
-
 
 # calculate spc and flag sites without a Sweep == 1; more negative means more Sweeps before fish is found
 df_all2 <- df_all2 |>
@@ -234,7 +234,7 @@ p
 plotly::ggplotly(p, tooltip = "text")
 
 
-# for analysis ----
+# df for analysis ----
 df_a <- df_all2 |> 
   filter(Sweep <= 3) |>
   group_by(Year, Station, Species) |>
@@ -242,7 +242,6 @@ df_a <- df_all2 |>
             bio = sum(bio.sum))
 
 # write.csv(df_a, "data_derived/df_a.csv")
-
 
 
 ## variables ----
@@ -255,11 +254,8 @@ str(df_a, give.attr=FALSE)
 
 
 ## area ----
-
 station <- as.character(1:10)
-
 library(readxl)
-
 area_2001 <- read_excel("../data/Rose Blanche - EF Site Dimensions.xls", 
            sheet = "August 2001", 
            range = "A3:D13") |>
@@ -279,8 +275,7 @@ df_a <- left_join(df_a, df_area, by = c("Year", "Station"))
 
 df_a <- df_a |>
   group_by(Year, Species, Station) |>
-  mutate(abun.stand = abun/Area*100, bio.stand = bio/Area*100) #
-
+  mutate(abun.stand = abun/Area*100, bio.stand = bio/Area*100)
 
 
 ## lat-long ----
@@ -298,9 +293,6 @@ str(df_a, give.attr=F)
 df_a$Station <- as.factor(df_a$Station)
 df_loc$sites <- as.factor(df_loc$sites)
 # write.csv(df_a, "data_derived/df_a3.csv")
-
-
-
 
 
 
@@ -365,6 +357,7 @@ df_4_5pass |> print(n = Inf)
 
 str(df_4_5pass, give.attr = F)
 
+## The below is used in RB_abun_bio.R for the FSA Carle-Strub estimates.
 # NOTE: WHEN USING:
 ### filter(length(Sweep) > 1 & Sweep <= 3) - this give sites where there were at least 2 sweeps but excludes 4 and 5 - this is inappropriate for any analysis involving a catchability estimate.  
 ### filter(Sweep <= 3)would be appropriate for using T
@@ -382,7 +375,7 @@ df_tab1[df_tab1$Species == "BT" & df_tab1$Year == 2001,]
 
 df_tab1 |> print(n = Inf)
 
-write.csv(df_tab1, "data_derived/df_tab1.csv")
+# write.csv(df_tab1, "data_derived/df_tab1.csv")
 
 # temp is same as df_tab1 but without the last filter
 ## the query above does not get rid of stations with captures on Sweep 1 (or 2 or 3) & 4 or 5 (all three have captures on sweep 3)
@@ -396,9 +389,9 @@ df_tab2 <- df_all2 |>
               names_from = Sweep, values_from = abun) #bio.sum abun
 str(df_tab2, give.attr = F)
 #View(df_tab2)
-write.csv(df_tab2, "data_derived/df_tab2.csv")
+# write.csv(df_tab2, "data_derived/df_tab2.csv")
 
-# 
+ 
 df_aj2 <- anti_join(df_tab2, df_tab1, by = c('Year', 'Species', 'Station'))
 
 

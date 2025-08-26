@@ -1,4 +1,4 @@
-# this is to do the Carle Strub estimates and get T (total Catch) as well as diagnostics.
+# this is to do the Carle Strub estimates and get T (total Catch) as well as diagnostics.  Basically, it shows that using FSA is pretty suspect for these data.
 source("RB_data_new.R")
 
 ### CS ----
@@ -47,10 +47,11 @@ head(out)
 #View(out)
 
 ### GF calc ----
-out$GF <- with(out, round((c1 - (No*p))^2/No*p +
-                            (c2 - No*(1-p)*p)^2/(No*(1-p)*p) +
-                            (c3 - (No*(1-p)^2*p))^2/(No*(1-p)^2*p)
-                          ,4)
+out$GF <- with(out, round(
+    (c1 - (No*p))^2/No*p +
+    (c2 - No*(1-p)*p)^2/(No*(1-p)*p) +
+    (c3 - (No*(1-p)^2*p))^2/(No*(1-p)^2*p)
+  ,4)
 )
 str(out)
 # write.csv(out, "data_derived/FSA_output.csv")

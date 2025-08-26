@@ -3,7 +3,8 @@
 ## Param CIs and Bootstrapped CIs
 ### Density
 
-# load files ----
+# Param Estimates ----
+## load files ----
 # create pattern
 temp1 = list.files(path = "output", pattern=".*_ci.csv$", full.names = T)
 
@@ -24,6 +25,7 @@ btyoy_den_ci$species <- "BTYOY"
 as_den_ci$species <- "AS"
 asyoy_den_ci$species <- "ASYOY"
 
+# bind CIs from param estimates
 tab_den <- rbind(bt_den_ci[1:3,-1], btyoy_den_ci[1:3,-1], as_den_ci[1:3, -1], asyoy_den_ci[1:3, -1])
 
 bt_bio_ci$species <- "BT"
@@ -33,11 +35,15 @@ asyoy_bio_ci$species <- "ASYOY"
 
 tab_bio <- rbind(bt_bio_ci[1:3,-1], btyoy_bio_ci[1:3,-1], as_bio_ci[1:3, -1], asyoy_bio_ci[1:3, -1])
 
+# change the parameter names
 tab <- cbind(tab_den, tab_bio[, 2:4])
 tab$parm[tab$parm == "cond.(Intercept)"] <- "Int"
-tab$parm[tab$parm == "cond.trtsc"] <- "Trt"
-tab$parm[tab$parm == "cond.typerun"] <- "Type"
+tab$parm[tab$parm == "cond.typetrt"] <- "Type"
+tab$parm[tab$parm == "cond.north"] <- "North"
+tab$parm[tab$parm == "zi.(Intercept)"] <- "zi:Int"
 
+## table: params ----
+### table of density and biomass estimates from GLMMs
 library(kableExtra)
 kbl(tab[, c(5, 1, 4, 2:3, 8, 6:7)], 
     col.names = c('spp', 'parm', 'Estimate', '2.5%', '97.5%',
@@ -51,17 +57,20 @@ kbl(tab[, c(5, 1, 4, 2:3, 8, 6:7)],
 
 
 tabC <- tab[, c(5, 1, 4, 2:3, 8, 6:7)]
-tabC$ci_den <- paste(round(tabC$Estimate, 2), 
-                     "(", 
+tabC$ci_den <- paste0(round(tabC$Estimate, 2), 
+                     " (", 
                      round(tabC$X2.5., 2), 
+                     ", ",
                      round(tabC$X97.5., 2), 
                      ")")
-tabC$ci_bio <- paste(round(tabC$Estimate.1, 2), 
-                     "(", 
+tabC$ci_bio <- paste0(round(tabC$Estimate.1, 2), 
+                     " (", 
                      round(tabC$X2.5..1, 2), 
+                     ", ",
                      round(tabC$X97.5..1, 2), 
                      ")")
 
+# the above table but with CIs in parantheses
 kbl(tabC[, c(1:2, 9,10)], 
     col.names = c('Species-age', 'Parameter', 'Density',
                   'Biomass'),
@@ -73,13 +82,16 @@ kbl(tabC[, c(1:2, 9,10)],
   kable_paper()
 
 
+# Bootstrap estimates ----
 # The below is tables and bootstrapped values to get CIs around density and biomass estimates that don't overlap zero.  
-
+# the corresponding figures are in RB_figs_new under bootstrap
 ## using kable() and kableExtra() - see website: https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html#Grouped_Columns__Rows
 
+## import data ----
 df_a <- read.csv("data_derived/df_a3.csv")
 
-# density - CI ----
+
+## density - CI ----
 
 # Hmisc - ben bolker approach
 #https://stackoverflow.com/questions/38554383/bootstrapped-confidence-intervals-with-dplyr
@@ -98,7 +110,7 @@ spp_den.ci$ci <- paste0("(", round(spp_den.ci$ll, 1), ", ", round(spp_den.ci$ul,
 spp_den.ci
 
 
-## total density ----
+### total density ----
 spp_den_tot.ci <- df_a |>
   group_by(Species, type) |>
   do(data.frame(rbind(Hmisc::smean.cl.boot(.$abun.stand)))) |>
@@ -110,7 +122,7 @@ spp_den_tot.ci
 
 
 
-## all density ----
+### all density ----
 all_den_ci <- rbind(spp_den.ci, spp_den_tot.ci)
 all_den_ci$Year <- ifelse(is.na(all_den_ci$Year), "Total", all_den_ci$Year)
 all_den_ci$mci <- paste(round(all_den_ci$mean, 2), "",  all_den_ci$ci)
@@ -145,7 +157,7 @@ kbl(all_den_ci_tabC,
   kable_paper()
 
 
-## density by year -----
+## density by year
 #### I'm not sure if this is really needed, i.e., this does not match Kristin's figures which are for the whole year; but there is a reason that you can't match.  I could so a sum of all fish or biomass in a year but then that is what I would be stuck with - a number.  This is not awful but there would be no confidence intervals around it.  Also, i'm not sure what the point of it is.  A yearly trend in fish and biomass.  Largely driven by ASY.
 
 # year_den_tot.ci <- df_b |>
@@ -163,7 +175,7 @@ kbl(all_den_ci_tabC,
 
 
 
-# biomass - CI ----
+## biomass - CI ----
 spp_bio.ci <- df_a |>
   group_by(Species, Year, type) |>
   do(data.frame(rbind(Hmisc::smean.cl.boot(.$bio.stand)))) |>
@@ -174,7 +186,7 @@ spp_bio.ci
 # spp_bio.ci$mci <- paste(round(spp_bio.ci$mean, 2), "",  spp_bio.ci$ci)
 
 
-## total biomass ----
+### total biomass ----
 spp_bio_tot.ci <- df_a |>
   group_by(Species, type) |>
   do(data.frame(rbind(Hmisc::smean.cl.boot(.$bio.stand)))) |>
@@ -186,7 +198,7 @@ spp_bio_tot.ci
 
 
 
-## all biomass ----
+### all biomass ----
 all_bio_ci <- rbind(spp_bio.ci, spp_bio_tot.ci)
 all_bio_ci$Year <- ifelse(is.na(all_bio_ci$Year), "Total", all_bio_ci$Year)
 all_bio_ci$mci <- paste(round(all_bio_ci$mean, 2), "",  all_bio_ci$ci)
@@ -220,7 +232,8 @@ kbl(all_bio_ci_tabC,
   kable_paper()
 
 
-## biomass by year -----
+# see note above in commented out section "densit by year"
+## biomass by year
 # year_bio_tot.ci <- df_b |>
 #   filter(Year != 2006 & trt != "con" & Month != "Sept") |>
 #   group_by(Year, trt, type) |>
