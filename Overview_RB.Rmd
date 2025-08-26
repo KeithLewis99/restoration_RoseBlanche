@@ -15,6 +15,9 @@ source("RB_fun.R")
 source("RB_tables.R")
 #source("GC_data_new.R")
 
+den_ci <- read.csv("data_derived/density_ci.csv")
+bio_ci <- read.csv("data_derived/biomass_ci.csv")
+
 # library ----
 library(nlme)
 library(glmmTMB)
@@ -98,7 +101,7 @@ knitr::include_graphics("output/BTYOY_biomass.png")
 AS {data-navmenu="Summary_all"}
 =====
 
-Column
+Column 
 -----------------------------------------------------------------------
 
 ### Density
@@ -312,3 +315,27 @@ kbl(all_bio_ci_tabC,
   kable_paper()
 
 ```
+
+
+CI Figs
+=====
+
+Column
+-----------------------------------------------------------------------
+
+### Density
+
+```{r}
+knitr::include_graphics("output/salmonid_density_new.png")
+```
+
+
+Column
+-----------------------------------------------------------------------
+
+### Biomass
+
+```{r}
+knitr::include_graphics("output/salmonid_biomass_new.png")
+```
+
