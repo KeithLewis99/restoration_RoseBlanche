@@ -4,6 +4,7 @@
 # The data are analyzed using a zero-inflated gamma model with random effects for Year.  The residuals are checked for normality, homogeneity of variance, temporal autocorrelation, and spatial autocorrelation.  The residuals are then used to create a spatial dataset that is used to check for spatial autocorrelation.  The results are then summarized and compared to the results of Scruton et al. 2005.  The results are then plotted - see RB_figs.R.
 
 ## abun.stand and bio.stand area #/area*100
+
 # source ----
 # source("Pam_abun_bio.R")
 source("RB_data_new.R")
@@ -102,7 +103,7 @@ residuals(bt.glmm2_simres)
 # these are scaled residuals
 
 
-# nomality and over dispersion - these look great
+# nomality and over dispersion - some issues with variance
 testUniformity(bt.glmm2_simres)
 testQuantiles(bt.glmm2_simres)
 
@@ -122,7 +123,7 @@ bt.glmm2_simres_recalc <- recalculateResiduals(bt.glmm2_simres, group = df_aBT$Y
 
 testTemporalAutocorrelation(bt.glmm2_simres_recalc, time = unique(df_aBT$Year))
 
-# autocorrelations is fine but definitely a trend with Year resids.  Dave thinks that this isn't a problem - its not part of the model and not much to do about it. Conclude no temproal issues
+# autocorrelations is fine; a trend with Year resids but resolved it.  
 
 
 ### spatial independence - so few data here that its a bit of a meaningless exercise
@@ -142,7 +143,7 @@ bt.biomass.all <- spatialData_join(df_sumBT, bt.glmm2_simres_recalcSpace, df_loc
 
 spatialAutoCorrGG_fun(bt.biomass.all)
 
-# Diagnostics had a few issues but minor and p is far from alpha.
+# Spatial is great but had to extend the model from just ~type. Diagnostics had a few issues but minor and p is far from alpha.
 
 ### summary ----
 summary(best_model)
@@ -154,11 +155,8 @@ tab.ci(best_model, "bt_den")
 
 
 
-
-
 ## BTYOY ----
 ### data ----
-str(df_a, give.attr=FALSE)
 df_aBTYOY <- df_a[df_a$Species == "BTYOY",]
 plot(density(df_aBTYOY$abun.stand, na.rm = T))
 summary(df_aBTYOY$abun.stand)
@@ -179,9 +177,7 @@ btyoy.glmm1 <- glmmTMB(
   REML = TRUE,
   data = df_aBTYOY
 )
-
 summary(btyoy.glmm1)
-
 
 
 # Fifield advised the following
@@ -196,7 +192,7 @@ btyoy.glmm2 <- glmmTMB(
 summary(btyoy.glmm2)
 
 # str(bt.glmm2)
-anova(btyoy.glmm1, btyoy.glmm2) # this suggests that model btyoy.glmm2 without dispersion is slightly better than with (btyoy.glmm1)
+anova(btyoy.glmm1, btyoy.glmm2) # this suggests that model btyoy.glmm1 with dispersion is better 
 
 # Get the model with the lowest AIC
 tmp <- anova(btyoy.glmm1, btyoy.glmm2)
@@ -251,7 +247,7 @@ btyoy.biomass.all <- spatialData_join(df_sumBT, btyoy.glmm2_simres_recalcSpace, 
 spatialAutoCorrGG_fun(btyoy.biomass.all)
 
 
-# Diagnostics are fine - proceed
+# Diagnostics are fine.  Small issue with trend in years - proceed
 
 ### summary ----
 summary(best_model)
@@ -304,7 +300,7 @@ summary(as.glmm2)
 
 anova(as.glmm1, as.glmm2)
 # str(as.glmm2)
-# as.glmm1 is the better model with ziformula = ~ 1 and when type + time - significant difference
+# as.glmm2 is the better model 
 
 # Get the model with the lowest AIC
 tmp <- anova(as.glmm1, as.glmm2)
@@ -319,15 +315,15 @@ as.glmm1_simres <- simulateResiduals(best_model, plot = T)
 # str(as.glmm1_simres,1)
 residuals(as.glmm1_simres) 
 # these are scaled residuals
-# The normality/overdispersion are great but the  homogeneity of variance is bad.  
+# The normality/overdispersion and homogeneity of varinace are great.  
 
 # plots by themselves or by group
 testUniformity(as.glmm1_simres)
 testQuantiles(as.glmm1_simres)
 
 
-plotResiduals(as.glmm1_simres, form = df_aAS$type) 
-plotResiduals(as.glmm1_simres, form = df_aAS$Year)
+plotResiduals(as.glmm1_simres, form = df_aAS$type) # fine 
+plotResiduals(as.glmm1_simres, form = df_aAS$Year) # all lines trend upwards
 
 
 
@@ -337,12 +333,11 @@ testZeroInflation(as.glmm1_simres) # this gives a bogus result but clearly, from
 
 
 ### temporal independence
-# But, to look at temporal autocorrelation, we need to recalculate them with Year as a grouping variable
 as.glmm1_simres_recalc <- recalculateResiduals(as.glmm1_simres, group = df_aAS$Year)
 
 testTemporalAutocorrelation(as.glmm1_simres_recalc, time = unique(df_aAS$Year))
 
-# resids were not good with the initial model;  
+# autocorrelation is fine but definite trend in resids
 
 
 ### spatial independence
@@ -363,7 +358,8 @@ as.biomass.all <- spatialData_join(df_sumAS, as.glmm1_simres_recalcSpace, df_loc
 spatialAutoCorrGG_fun(as.biomass.all)
 
 
-# Diagnostics look fantastic for this model.  Proceed with this model (as.glmm1).  See glmm_anova for above but without REML which will allow for the BACI.
+# Diagnostics look fantastic for this model except for a trend in the Years.  Proceed with this model (as.glmm2).  
+
 
 ### summary ----
 test <- summary(best_model)
@@ -384,7 +380,6 @@ tmp[1:5, c(3, 1:2)]
 
 ## ASYOY ----
 ### data ----
-str(df_a, give.attr=FALSE)
 df_aASYOY <- df_a[df_a$Species == "ASYOY",]
 plot(density(df_aASYOY$abun.stand, na.rm = T))
 ggplot(df_aASYOY, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_wrap(~Year)
@@ -493,7 +488,6 @@ tab.ci(best_model, "asyoy_den")
 ## BT ----
 ### data ----
 
-
 plot(density(df_aBT$bio.stand, na.rm = T))
 summary(df_aBT$bio.stand)
 with(df_aBT, table(bio, Year))
@@ -529,7 +523,7 @@ summary(bt_bio.glmm2)
 
 anova(bt_bio.glmm1, bt_bio.glmm2)
 
-# bt_bio.glmm2 is the better model but see how diagnostics look 
+# bt_bio.glmm2 is the better model
 
 
 # Get the model with the lowest AIC
@@ -545,16 +539,14 @@ bt_bio.glmm2_simres <- simulateResiduals(best_model, plot = T)
 # str(as_bio.glmm1_simres,1)
 residuals(bt_bio.glmm2_simres) 
 # these are scaled residuals
-# The normality/overdispersion s great and  homogeneity of variance is good.  
+# The normality/overdispersion s and  homogeneity of variance is good.  
 
 # plots by themselves or by group
 testUniformity(bt_bio.glmm2_simres)
 testQuantiles(bt_bio.glmm2_simres)
 
-plotResiduals(bt_bio.glmm2_simres, form = df_aBT$type)
-plotResiduals(bt_bio.glmm2_simres, form = df_aBT$Year)
-# these all look great
-
+plotResiduals(bt_bio.glmm2_simres, form = df_aBT$type) # great
+plotResiduals(bt_bio.glmm2_simres, form = df_aBT$Year) # some trend
 
 # dispersion/zeroinflation
 testDispersion(bt_bio.glmm2_simres)
@@ -567,7 +559,7 @@ bt_bio.glmm2_simres_recalc <- recalculateResiduals(bt_bio.glmm2_simres, group = 
 
 testTemporalAutocorrelation(bt_bio.glmm2_simres_recalc, time = unique(df_aAS$Year))
 
-# not autocorrelatoin but resids v. time has trend.  See above and conclude no temproal issues
+# no autocorrelatoin;  resids v. time is OK.  
 
 
 ### spatial independence
@@ -586,7 +578,7 @@ bt_bio.biomass.all <- spatialData_join(df_sumBT, bt_bio.glmm2_simres_recalcSpace
 
 
 spatialAutoCorrGG_fun(bt_bio.biomass.all)
-
+# spatial autocorrelation is great
 
 # Diagnostics look fine for this model.  Proceed with this model (bt_bio.glmm2).  See glmm_anova for above but without REML which will allow for the BACI.
 
@@ -604,8 +596,6 @@ tab.ci(best_model, "bt_bio")
 
 ## BTYOY ----
 ### data ----
-
-
 plot(density(df_aBTYOY$bio.stand, na.rm = T))
 summary(df_aBTYOY$bio.stand)
 with(df_aBTYOY, table(bio, Year))
@@ -624,7 +614,6 @@ btyoy_bio.glmm1 <- glmmTMB(
   REML = TRUE,
   data = df_aBTYOY
 )
-
 summary(btyoy_bio.glmm1)
 
 
@@ -638,8 +627,7 @@ btyoy_bio.glmm2 <- glmmTMB(
 summary(btyoy_bio.glmm2)
 
 anova(btyoy_bio.glmm1, btyoy_bio.glmm2)
-
-# btyoy_bio.glmm2 is a marginally better model but see how diagnostics look 
+# btyoy_bio.glmm2 is a marginally better model
 
 # Get the model with the lowest AIC
 tmp <- anova(btyoy_bio.glmm1, btyoy_bio.glmm2)
@@ -660,9 +648,8 @@ residuals(btyoy_bio.glmm2_simres)
 testUniformity(btyoy_bio.glmm2_simres)
 testQuantiles(btyoy_bio.glmm2_simres)
 
-plotResiduals(btyoy_bio.glmm2_simres, form = df_aBTYOY$type)
-plotResiduals(btyoy_bio.glmm2_simres, form = df_aBTYOY$Year)
-# these all look great
+plotResiduals(btyoy_bio.glmm2_simres, form = df_aBTYOY$type) # great
+plotResiduals(btyoy_bio.glmm2_simres, form = df_aBTYOY$Year) # temporal trend - ignore
 
 
 # dispersion/zeroinflation
@@ -675,7 +662,7 @@ testZeroInflation(btyoy_bio.glmm2_simres) # these look great
 btyoy_bio.glmm2_simres_recalc <- recalculateResiduals(btyoy_bio.glmm2_simres, group = df_aAS$Year)
 
 testTemporalAutocorrelation(btyoy_bio.glmm2_simres_recalc, time = unique(df_aAS$Year))
-
+# autocorrelation looks great
 
 ### spatial independence
 # recalculate resids with stations as the grouping variable
@@ -693,7 +680,7 @@ btyoy_bio.biomass.all <- spatialData_join(df_sumBTYOY, btyoy_bio.glmm2_simres_re
 
 
 spatialAutoCorrGG_fun(btyoy_bio.biomass.all)
-
+# spatial autocorrelation is fine
 
 # Diagnostics look fine for this model.  Proceed with this model (btyoy_bio.glmm2).  See glmm_anova for above but without REML which will allow for the BACI.
 
@@ -715,7 +702,6 @@ summary(df_aAS$bio.stand)
 with(df_aAS, table(bio, Year))
 with(df_aAS, table(bio, Station, Year))
 ggplot(df_aAS, aes(x = Station, y = bio.stand)) + geom_boxplot() + facet_wrap(~Year)
-
 
 
 ### analyses ----
@@ -765,14 +751,14 @@ as_bio.glmm2_simres <- simulateResiduals(best_model, plot = T)
 # str(as_bio.glmm1_simres,1)
 residuals(as_bio.glmm2_simres) 
 # these are scaled residuals
-# The normality/overdispersion isn't great and definite pattern in the homogeneity of variance but not awful
+# The normality/overdispersion and the homogeneity of variance are great
 
 # plots by themselves or by group
 testUniformity(as_bio.glmm2_simres)
 testQuantiles(as_bio.glmm2_simres)
 
-plotResiduals(as_bio.glmm2_simres, form = df_aAS$type)
-plotResiduals(as_bio.glmm2_simres, form = df_aAS$Year)
+plotResiduals(as_bio.glmm2_simres, form = df_aAS$type) #great
+plotResiduals(as_bio.glmm2_simres, form = df_aAS$Year) # slight trend but OK
 
 
 # dispersion/zeroinflation
@@ -786,7 +772,7 @@ as_bio.glmm2_simres_recalc <- recalculateResiduals(as_bio.glmm2_simres, group = 
 
 testTemporalAutocorrelation(as_bio.glmm2_simres_recalc, time = unique(df_aAS$Year))
 
-# Temporal resids are awful with first model but OK with the second
+# Temporal resids are fine 
 
 
 ### spatial independence
@@ -803,9 +789,8 @@ spatialAutoCorrBase_fun(df_aAS, as_bio.glmm2_simres_recalcSpace)
 
 as_bio.biomass.all <- spatialData_join(df_sumAS, as_bio.glmm2_simres_recalcSpace, df_loc[, c(2:4)])
 
-
 spatialAutoCorrGG_fun(as_bio.biomass.all)
-
+# spatial autocorrelation is fine
 
 ### summary ----
 summary(best_model)
@@ -875,7 +860,7 @@ asyoy_bio.glmm2 <- glmmTMB(
 )
 summary(asyoy_bio.glmm2)
 
-anova(asyoy_bio.glmm1, asyoy_bio.glmm2)
+anova(asyoy_bio.glmm1, asyoy_bio.glmm2) # glmm2 is a smidge better - really no difference
 
 # Get the model with the lowest AIC
 tmp <- anova(asyoy_bio.glmm1, asyoy_bio.glmm2)
@@ -892,15 +877,15 @@ asyoy_bio.glmm2_simres <- simulateResiduals(best_model, plot = T)
 # str(asyoy_bio.glmm1_simres,1)
 residuals(asyoy_bio.glmm2_simres) 
 # these are scaled residuals
-# The normality/overdispersion fine; definite trend in the homogeneity of variance but not awful
+# The normality/overdispersion fine; small trend in the homogeneity of variance but not awful
 
 # plots by themselves or by group
 testUniformity(asyoy_bio.glmm2_simres)
 testQuantiles(asyoy_bio.glmm2_simres)
 
 # none of these are great but not awful
-plotResiduals(asyoy_bio.glmm2_simres, form = df_aASYOY$type)
-plotResiduals(asyoy_bio.glmm2_simres, form = df_aASYOY$Year)
+plotResiduals(asyoy_bio.glmm2_simres, form = df_aASYOY$type) # fine
+plotResiduals(asyoy_bio.glmm2_simres, form = df_aASYOY$Year) # an upward trend - proceed
 
 
 # dispersion/zeroinflation
@@ -914,7 +899,7 @@ asyoy_bio.glmm2_simres_recalc <- recalculateResiduals(asyoy_bio.glmm2_simres, gr
 
 testTemporalAutocorrelation(asyoy_bio.glmm2_simres_recalc, time = unique(df_aASYOY$Year))
 
-# Temporal resids look fine except for trend in years
+# Temporal resids look fine
 
 
 ### spatial independence
@@ -933,9 +918,9 @@ asyoy_bio.biomass.all <- spatialData_join(df_sumASYOY, asyoy_bio.glmm2_simres_re
 
 
 spatialAutoCorrGG_fun(asyoy_bio.biomass.all)
+# spatial resids are OK.
 
-
-# Diagnostics were fine for first iteration except for temp autocorrelation.  Tweaked the ziformula and now it all looks fantastic Proceed with this model (as.glmm1).  See glmm_anova for above but without REML which will allow for the BACI.
+# Diagnostics look fine.
 
 ### summary ----
 summary(best_model)
