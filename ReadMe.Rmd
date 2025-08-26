@@ -67,10 +67,11 @@ Note: there are three possible scenarios: pt estimate == 0 and NA for CI, pt est
 - CIs for BT were generally small at the Station level but for BT:Station7:2000-2001, there were either few fish caught or the assumption of catching fewer fish with each pass was violated.  This seems to result in the large confidence intervals.  
 
 # Conclusions
-I think that the best thing to do, ito graphs and analyses, is to redo this from the ground up.  Clearly, there is a lot of good work that was done but its not reproducbile and if any reviewer knows about this stuff, we will have to redo it anyway.  The existing data sets have either been naively calculated or, just don't have the variance estimates (confidence intervals).
+I think that the best thing to do, ito graphs and analyses, is to redo this from the ground up.  Clearly, there is a lot of good work that was done but its not reproducible and if any reviewer knows about this stuff, we will have to redo it anyway.  The existing data sets have either been naively calculated or, just don't have the variance estimates (confidence intervals).
 
 # Post 2025, August
-I did a lot of work initially on Rose Blanche and this helped me to arrive at the approaches used on Pamehac and Granite.  However, I abandonded it because I didn't have the lat/longs and the 1998 data.  I have tried to locate the 1998 data to no avail.  I does not appear to be on the archive, nor is it in Scruton's papers.  So, we'll just have to proceed with a CI study and hope that its OK.  
+I did a lot of work initially on Rose Blanche and this helped me to arrive at the approaches used on Pamehac and Granite.  
+However, I abandoned it because I didn't have the lat/longs and the 1998 data.  **I have tried to locate the 1998 data to no avail.**  I does not appear to be on the archive, nor is it in Scruton's papers.  So, we'll just have to proceed with a CI study and hope that its OK.  
 
 The below will follow the format of the Pamehac study.  See Pamehac and Granite for thoughts on models and approach and what have I learned.
 
@@ -242,6 +243,17 @@ abline(h=90)
 - Lots of very low catches, very few over 30  
 - Lots of sites with GF > GF crit  
 - Few fish caught after 4-5 passes
+
+** Go with T**
+
+## Presentation
+
+Aug 26, 2025: had a bit of a dilemma about how to present the results given that my thinking has evolved over time and I did things somewhat differently (or very differently for each of the 4 study areas).  My dilemma revolved around how to best present the parameter estimates (i.e., NHST type info) and yearly estimates for the response variable.
+
+Response variable: For Seal Cove (including the paper), I presented the density/biomass as naive point estimates with standard errors, i.e,. I just took the mean and se of the stations for a particular time/treatment for each year.  This isn't awful but when the point estimate is low and there is substantial variance, the CI can be very wide and even include zero.  This is especially true for Rose Blanche where there are many low counts.  I also considered using predicted values but i'm concerned with the effect that zi and dispersion model have and that i'm not properly taking these into account.  Therefore, I have concluded that the best approach is to use the bootstrp to calculate density/biomass estimates for Species, Year, and Type which I will present in figures but with tables in an appendix (currently in dashboard).  This will be more consistent/certain and also better reflect the uncertainty in the estimates.
+
+Parameter estimates: For Seal Cove, I presented the parameter estimates of the conditional models in a table.  But I had thought it might be good to do this with the predicted values but in a figure.  However, I decided to abandon the graphical presentation of the predicted values which I had done for Pamehac.  I didn't do anything wrong here - this approach is not a bad thing but they only "appeared" to work for Pamehac because the conditional models were just interaction plus random effect.  The Rose Blanche models often had other terms to help out the diagnostics.  This means that the predicted values are different for each Station within a Year for the latter i.e., a different value for each station per level but not the former, i.e, the same value for each station per level.  Note though that the control_impact_year function effectively shows the predicted values for each station by year and this might be good to remember.
+
 
 
 # References
