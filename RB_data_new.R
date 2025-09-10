@@ -352,7 +352,11 @@ df_4_5pass <- df_all2 |>
 #  summarize(count = n()) |>
   # pivot_wider(names_from = Sweep, values_from = count, values_fill = 0)
   filter(abun > 0) |>
-  pivot_wider(names_from = Sweep, values_from = abun, values_fill = 0)
+  pivot_wider(names_from = Sweep, values_from = abun, values_fill = 0) 
+# |>
+#   relocate(`1`, .after = Station) |>
+#   relocate(`4`, .after = `3`)
+
 df_4_5pass |> print(n = Inf)
 
 str(df_4_5pass, give.attr = F)
