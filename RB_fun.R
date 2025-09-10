@@ -1,4 +1,7 @@
 # Functions for Rose Blanche - note that I haven't done ROxygen for all of these nor have all been converted to RB.
+str2 <- function(object, ...) {
+  utils::str(object, give.attr = FALSE, ...)
+}
 
 tab_type <- function(df, species, metric){
   #browser()
@@ -202,5 +205,52 @@ control_impact_year <- function(df, z, leg){
 }
 
 
+#' control_impact_year - differs from above bc these are for CIs
+#'
+#' @param df dataframe of year, type, time, abundance
+#' @param z filter variable: response variable - density or biomass, density == "d", biomass == "b"
+#'
+#' @return
+#' @export
+#'
+#' @examples
+control_impact_year1 <- function(df, z, leg){
+  # browser()
+  p1 <- ggplot(df, aes(x = as.factor(Year), y = mean, fill = type, colour = type)) + 
+    geom_point(position = position_dodge(width = 0.45),
+               size = 2) +
+    theme_bw() + 
+    {if (z == "b"){
+      ylab(expression("Biomass Estimate (g/m" ^2*")"))
+    } else if (z == "d"){
+      ylab(expression("Density Estimate (#/100 m" ^2*")"))
+    } else if (z == "n"){
+      theme(axis.title.y = element_blank())
+    }
+    } +
+    xlab("Year") +
+    geom_pointrange(aes(ymax = ll,
+                        ymin = ul),
+                    linewidth=1, 
+                    position = position_dodge(width = 0.45)
+    ) +
+    {if(leg == "y") {
+      theme(legend.position=c(0.85, 0.9), 
+            legend.background = element_rect(fill = "transparent")
+  #          legend.box.background = element_rect(fill = "transparent")
+            )
+    } else if(leg == "n"){
+      theme(legend.position="none")
+    }
+    } +
+    scale_fill_discrete(name="",
+                        breaks=c("con", "trt"),
+                        labels=c("Control", "Treatment")) +
+    scale_colour_manual(values=c("black", "dark grey"),
+                        name="",
+                        breaks=c("con", "trt"),
+                        labels=c("Control", "Treatment")) 
+  return(p1)
+}
 
 
