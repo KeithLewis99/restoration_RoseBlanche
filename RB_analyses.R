@@ -18,6 +18,7 @@ source("RB_fun.R")
 library(glmmTMB)
 library(DHARMa)
 library(ggplot2)
+library(emmeans)
 # library(cowplot)
 
 # check for zeros
@@ -52,7 +53,7 @@ bt.glmm1 <- glmmTMB(
   # abun.stand ~ type + (1 | Year), # Year resid bad, spatial unacceptable 
   # abun.stand ~ type + north + (1 | Year),# lowest AIC, variance issue, year trend
   # abun.stand ~ type + Year1 + (1 | Year), # all good but spatial bad
-  abun.stand ~ type + Year1 + north + (1 | Year), # variance issue, Year trend
+  abun.stand ~ type + Year2 + north + (1 | Year), # variance issue, Year trend
   # abun.stand ~ type + I(Year1^2) + north + (1 | Year), # all good but spatial bad
   dispformula = ~ type,
   family=ziGamma(link="log"), 
@@ -153,6 +154,16 @@ ggsave(paste0("output/BT_density.png"), width=10, height=8, units="in")
 confint(best_model)
 tab.ci(best_model, "bt_den") 
 
+emmeans(best_model, ~ type, component = "cond")
+
+emm.bt.den <- as.data.frame(
+  emmeans(best_model, 
+          ~ type, 
+          component = "response"))
+str(emm.bt.den)
+
+((emm.bt.den[2,2]-emm.bt.den[1,2])/
+    emm.bt.den[1,2])*100
 
 
 ## BTYOY ----
