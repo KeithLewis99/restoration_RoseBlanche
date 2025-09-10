@@ -197,4 +197,34 @@ ggplot(bio_ci, aes(x = as.factor(Year), y = mean, fill = type, colour = type)) +
                       labels=c("Control", "Treatment"))
 ggsave("output/salmonid_biomass_new.png", width=10, height=8, units="in")
 
+
+# density - publicatoin -----
+source("RB_fun.R")
+den_ci_bt <- den_ci |> filter(Species == "BT") 
+den_ci_bty <- den_ci |> filter(Species == "BTYOY") 
+den_ci_as <- den_ci |> filter(Species == "AS") 
+den_ci_asy <- den_ci |> filter(Species == "ASYOY") 
+
+p1 <- control_impact_year1(den_ci_bt, "d", "n")
+p2 <- control_impact_year1(den_ci_bty, "n", "y")
+p3 <- control_impact_year1(den_ci_as, "d", "n")
+p4 <- control_impact_year1(den_ci_asy, "n", "n")
+
+plot_grid(p1, p2, p3, p4, labels = c('A', 'B', 'C', 'D'), nrow = 2)
+ggsave("output/all_density_boot_new.png", width=10, height=8, units="in")
+
+
+bio_ci_bt <- bio_ci |> filter(Species == "BT") 
+bio_ci_bty <- bio_ci |> filter(Species == "BTYOY") 
+bio_ci_as <- bio_ci |> filter(Species == "AS") 
+bio_ci_asy <- bio_ci |> filter(Species == "ASYOY") 
+
+p5 <- control_impact_year1(bio_ci_bt, "b", "n")
+p6 <- control_impact_year1(bio_ci_bty, "n", "y")
+p7 <- control_impact_year1(bio_ci_as, "b", "n")
+p8 <- control_impact_year1(bio_ci_asy, "n", "n")
+
+plot_grid(p5, p6, p7, p8, labels = c('A', 'B', 'C', 'D'), nrow = 2)
+ggsave("output/all_biomass_boot_new.png", width=10, height=8, units="in")
+
 # END ----
