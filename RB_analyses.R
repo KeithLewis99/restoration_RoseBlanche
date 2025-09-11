@@ -53,7 +53,7 @@ bt.glmm1 <- glmmTMB(
   # abun.stand ~ type + (1 | Year), # Year resid bad, spatial unacceptable 
   # abun.stand ~ type + north + (1 | Year),# lowest AIC, variance issue, year trend
   # abun.stand ~ type + Year1 + (1 | Year), # all good but spatial bad
-  abun.stand ~ type + Year2 + north + (1 | Year), # variance issue, Year trend
+  abun.stand ~ type + Year1 + north + (1 | Year), # variance issue, Year trend
   # abun.stand ~ type + I(Year1^2) + north + (1 | Year), # all good but spatial bad
   dispformula = ~ type,
   family=ziGamma(link="log"), 
@@ -154,14 +154,9 @@ ggsave(paste0("output/BT_density.png"), width=10, height=8, units="in")
 confint(best_model)
 tab.ci(best_model, "bt_den") 
 
+## emmeans
 emmeans(best_model, ~ type, component = "cond")
-
-emm.bt.den <- as.data.frame(
-  emmeans(best_model, 
-          ~ type, 
-          component = "response"))
-str(emm.bt.den)
-
+emm.bt.den <- as.data.frame(emmeans(best_model, ~ type,       component = "response"))
 ((emm.bt.den[2,2]-emm.bt.den[1,2])/
     emm.bt.den[1,2])*100
 
@@ -268,6 +263,11 @@ ggsave(paste0("output/BTYOY_density.png"), width=10, height=8, units="in")
 confint(best_model)
 tab.ci(best_model, "btyoy_den") 
 
+## emmeans
+emmeans(best_model, ~ type, component = "cond")
+emm.bty.den <- as.data.frame(emmeans(best_model, ~ type,       component = "response"))
+((emm.bty.den[2,2]-emm.bty.den[1,2])/
+    emm.bty.den[1,2])*100
 
 
 
@@ -603,6 +603,12 @@ confint(best_model)
 confint(best_model)[1:4, ]
 tab.ci(best_model, "bt_bio") 
 
+## emmeans
+emmeans(best_model, ~ type, component = "cond")
+emmeans(best_model, ~ type, component = "response")
+emm.bt.bio <- as.data.frame(emmeans(best_model, ~ type,       component = "response"))
+((emm.bt.bio[2,2]-emm.bt.bio[1,2])/
+    emm.bt.bio[1,2])*100
 
 
 ## BTYOY ----
@@ -704,6 +710,12 @@ confint(best_model)[1:4, ]
 #confint(btyoy_bio.glmm1)[1:4, ]
 tab.ci(best_model, "btyoy_bio") 
 
+## emmeans
+emmeans(best_model, ~ type, component = "cond")
+emmeans(best_model, ~ type, component = "response")
+emm.bty.bio <- as.data.frame(emmeans(best_model, ~ type,       component = "response"))
+((emm.bty.bio[2,2]-emm.bty.bio[1,2])/
+    emm.bty.bio[1,2])*100
 
 
 ## AS ----
