@@ -268,7 +268,7 @@ kbl(tabC[, c(1:2, 9,10)],
 
 
 
-Density CI Table 
+Density {data-navmenu="Bootstrap CI"}
 =====
 
 
@@ -284,7 +284,7 @@ kbl(all_den_ci_tabC,
                   '2002',
                   '2016',
                   'total'),
-    align = 'c', caption = "Density CIs", digits = 2 ) |>
+    align = 'c', caption = "Density 95% CIs (bootstrap)", digits = 2 ) |>
   collapse_rows(valign = "top",
                 latex_hline = "major") |>
   add_header_above(header = c(" " = 2, "Year" = 5)) |>
@@ -292,7 +292,7 @@ kbl(all_den_ci_tabC,
 ```
 
 
-Biomass CI Table 
+Biomass {data-navmenu="Bootstrap CI"}
 =====
 
 
@@ -308,7 +308,7 @@ kbl(all_bio_ci_tabC,
                   '2002',
                   '2015',
                   'total'),
-    align = 'c', caption = "Biomass CIs", digits = 2 ) |>
+    align = 'c', caption = "Biomass 95% CIs", digits = 2 ) |>
   collapse_rows(valign = "top",
                 latex_hline = "major") |>
   add_header_above(header = c(" " = 2, "Year" = 5)) |>
@@ -326,7 +326,7 @@ Column
 ### Density
 
 ```{r}
-knitr::include_graphics("output/salmonid_density_new.png")
+knitr::include_graphics("figs/species_den_ci.png")
 ```
 
 
@@ -336,6 +336,6 @@ Column
 ### Biomass
 
 ```{r}
-knitr::include_graphics("output/salmonid_biomass_new.png")
+knitr::include_graphics("figs/species_bio_ci.png")
 ```
 
