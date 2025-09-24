@@ -8,6 +8,8 @@
 *.jpg
 *.csv
 *.html
+ReadMe.html
+*.html
 
 output/
 figs/
