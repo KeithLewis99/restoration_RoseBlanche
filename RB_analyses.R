@@ -160,7 +160,18 @@ emm.bt.den <- as.data.frame(emmeans(best_model, ~ type,       component = "respo
 ((emm.bt.den[2,2]-emm.bt.den[1,2])/
     emm.bt.den[1,2])*100
 
+#### blup ---- 
+btd_rdm <- modelbased::estimate_grouplevel(best_model)
+p <- plot(btd_rdm) # this seems to work now
+p + labs(y = "BLUP - 95% CI")
+ggsave(paste0("output/BT_density_blups.png"), width=8, height=6, units="in")
 
+#### zi ----
+zi <- summary(best_model)$coefficients$zi
+plogis(zi[1,1]) # 58% chance of zeros on Control
+plogis(zi[1,1] + zi[2,1]) # 11% chance of zeros on  Treatment
+
+  
 ## BTYOY ----
 ### data ----
 df_aBTYOY <- df_a[df_a$Species == "BTYOY",]
@@ -269,6 +280,14 @@ emm.bty.den <- as.data.frame(emmeans(best_model, ~ type,       component = "resp
 ((emm.bty.den[2,2]-emm.bty.den[1,2])/
     emm.bty.den[1,2])*100
 
+#### blup ---- 
+btyd_rdm <- modelbased::estimate_grouplevel(best_model)
+p <- plot(btyd_rdm) # this seems to work now
+p + labs(y = "BLUP - 95% CI")
+ggsave(paste0("output/BTY_density_blups.png"), width=8, height=6, units="in")
+
+#### zi ----
+# non-sig Year effect
 
 
 ## AS ----
@@ -388,6 +407,14 @@ tmp[1:5, c(3, 1:2)]
 # percent increase
 ((exp(tmp[1,3] + tmp[2,3]))-exp(tmp[1,3]))/exp(tmp[1,3])*100
 
+#### blup ---- 
+asd_rdm <- modelbased::estimate_grouplevel(best_model)
+p <- plot(asd_rdm) # this seems to work now
+p + labs(y = "BLUP - 95% CI")
+ggsave(paste0("output/AS_density_blups.png"), width=8, height=6, units="in")
+
+#### zi ----
+# non-sig Year effect
 
 ## ASYOY ----
 ### data ----
@@ -492,6 +519,17 @@ ggsave(paste0("output/ASYOY_density.png"), width=10, height=8, units="in")
 
 confint(best_model)
 tab.ci(best_model, "asyoy_den") 
+
+### emmeans ----
+## no sig effects
+#### blup ---- 
+asyd_rdm <- modelbased::estimate_grouplevel(best_model)
+p <- plot(asyd_rdm) # this seems to work now
+p + labs(y = "BLUP - 95% CI")
+ggsave(paste0("output/ASY_density_blups.png"), width=8, height=6, units="in")
+
+#### zi ----
+# no zi
 
 
 
@@ -603,12 +641,18 @@ confint(best_model)
 confint(best_model)[1:4, ]
 tab.ci(best_model, "bt_bio") 
 
-## emmeans
+## emmeans ----
 emmeans(best_model, ~ type, component = "cond")
 emmeans(best_model, ~ type, component = "response")
 emm.bt.bio <- as.data.frame(emmeans(best_model, ~ type,       component = "response"))
 ((emm.bt.bio[2,2]-emm.bt.bio[1,2])/
     emm.bt.bio[1,2])*100
+
+#### blup ---- 
+btb_rdm <- modelbased::estimate_grouplevel(best_model)
+p <- plot(btb_rdm) # this seems to work now
+p + labs(y = "BLUP - 95% CI")
+ggsave(paste0("output/BT_biomass_blups.png"), width=8, height=6, units="in")
 
 
 ## BTYOY ----
@@ -710,12 +754,18 @@ confint(best_model)[1:4, ]
 #confint(btyoy_bio.glmm1)[1:4, ]
 tab.ci(best_model, "btyoy_bio") 
 
-## emmeans
+## emmeans ----
 emmeans(best_model, ~ type, component = "cond")
 emmeans(best_model, ~ type, component = "response")
 emm.bty.bio <- as.data.frame(emmeans(best_model, ~ type,       component = "response"))
 ((emm.bty.bio[2,2]-emm.bty.bio[1,2])/
     emm.bty.bio[1,2])*100
+
+#### blup ---- 
+btyb_rdm <- modelbased::estimate_grouplevel(best_model)
+p <- plot(btyb_rdm) # this seems to work now
+p + labs(y = "BLUP - 95% CI")
+ggsave(paste0("output/BTY_biomass_blups.png"), width=8, height=6, units="in")
 
 
 ## AS ----
@@ -847,6 +897,11 @@ tmp[1:4, c(3, 1:2)]
 # ((exp(tmp[1,3] + tmp[2,3] + tmp[3,3] + tmp[4,3]))-exp(tmp[1,3] + tmp[2,3]+ tmp[3,3]))/exp(tmp[1,3]+ tmp[2,3] + tmp[3,3])*100
 # 
 # # however, 2 and 4 give the same result which is scary
+#### blup ---- 
+asb_rdm <- modelbased::estimate_grouplevel(best_model)
+p <- plot(asb_rdm) # this seems to work now
+p + labs(y = "BLUP - 95% CI")
+ggsave(paste0("output/AS_biomass_blups.png"), width=8, height=6, units="in")
 
 
 ## ASYOY ----
@@ -955,5 +1010,10 @@ confint(best_model)
 confint(best_model)[1:4, c(3, 1, 2)]
 tab.ci(best_model, "asyoy_bio") 
 
+#### blup ---- 
+asyb_rdm <- modelbased::estimate_grouplevel(best_model)
+p <- plot(asyb_rdm) # this seems to work now
+p + labs(y = "BLUP - 95% CI")
+ggsave(paste0("output/ASY_biomass_blups.png"), width=8, height=6, units="in")
 
 # END ----
