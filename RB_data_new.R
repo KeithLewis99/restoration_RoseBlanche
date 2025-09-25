@@ -278,6 +278,8 @@ df_a <- df_a |>
   mutate(abun.stand = abun/Area*100, bio.stand = bio/Area*100)
 
 
+
+
 ## lat-long ----
 df_loc <- read.csv("../data/waypoints_RB.csv")
 df_loc <- df_loc |>
