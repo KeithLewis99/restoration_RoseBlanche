@@ -1,4 +1,7 @@
 # recreate Kristin's figures; these are figures that were in the folders and the manuscript she sent but no corresponding code.  Also the error bars here do not 
+
+# I think that Fig 4 is redundant wtih 5.  Therefore, I have modified 5 accordingly.
+
 library(ggplot2)
 source("RB_data.R")
 
@@ -20,49 +23,65 @@ ggplot(RB_MeanBioComp[3:6,], aes(as.factor(year), meanbiomass)) +
 
 
 # Fig 5 ---- 
+
   RB_Biomass_MainandComp_se <- 
     ggplot(RB_meansalmonidsbysite, 
            aes(as.factor(Year), MeanBiomass)) + 
-    theme_bw() + 
-    geom_point(aes(colour=as.factor(Habitat)), position=position_dodge(0.9), size = 3) + 
+    theme_bw(base_size = 20) + 
+    geom_point(aes(colour=as.factor(Habitat), shape=as.factor(Habitat)), position=position_dodge(0.9), size = 3) + 
     geom_vline(xintercept = 4.5, linetype = "dashed") +
     geom_errorbar(aes(ymax= MeanBiomass + MB_se, ymin=MeanBiomass - MB_se, colour = as.factor(Habitat)), linewidth=0.6, width=0.30, position=position_dodge(.9)) +
-    scale_colour_manual(breaks = c("Destroyed", "Compensation", "Main Stem"), values=c("red", "black", "blue")) +
+#    scale_colour_manual(breaks = c("Destroyed", "Compensation", "Main Stem"), values=c("red", "black", "blue")) +
     # theme(axis.text.x  = element_text(vjust=0.4, size=12)) +
     # theme(axis.text.y  = element_text(vjust=0.4, size=12)) +
     # theme(axis.title.y  = element_text(vjust=0.4, size=12)) +
     # theme(axis.title.x  = element_text(vjust=0.4, size=12)) +
-    ylab("Biomass Estimate (grams/100 sq. meters)") + 
+    #ylab("Biomass Estimate (grams/100 sq. meters)") + 
+    ylab(expression("Biomass Estimate (g/m" ^2*")")) + 
     xlab("Year") +
     theme(legend.title=element_blank()) +
     theme(legend.position = "inside", legend.position.inside = c(.20, .85)) +
-    theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
-  
-  RB_Biomass_MainandComp_se
+    theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank()) +
+    geom_hline(yintercept = RB_MeanBioComp[1,3], colour = "red") +
+  scale_colour_manual(
+    breaks = c("Destroyed", "Compensation", "Main Stem"), 
+    values=c("black", "black", "grey")) +
+  scale_shape_manual(
+    breaks = c("Destroyed", "Compensation", "Main Stem"), 
+    values=c(0, 16, 16))
+RB_Biomass_MainandComp_se
+ggsave("figs/salmonids_biomass_by_trt.png", width=10, height=8, units="in")
 
-  
-    
 # Fig 6 ----  
 RB_Density_MainandComp_se <- 
   ggplot(RB_meansalmonidsbysite, 
          aes(as.factor(Year), MeanDensity)) + 
-  theme_bw() + 
-  geom_point(aes(colour=as.factor(Habitat)), position=position_dodge(0.9), size = 3) + 
+  theme_bw(base_size = 20) + 
+  geom_point(aes(colour=as.factor(Habitat), shape=as.factor(Habitat)), position=position_dodge(0.9), size = 3) + 
   geom_errorbar(aes(ymax= MeanDensity + MD_se, ymin=MeanDensity - MD_se, colour = as.factor(Habitat)), linewidth=0.6, width=0.30, position=position_dodge(.9)) +
   geom_vline(xintercept = 4.5, linetype = "dashed") +
-  scale_colour_manual(breaks = c("Destroyed", "Compensation", "Main Stem"), values=c("red", "black", "blue")) +
+  geom_hline(yintercept = RB_meansalmonidsbysite[1,6], colour = "red") +
+#  scale_colour_manual(
+    # breaks = c("Destroyed", "Compensation", "Main Stem"), values=c("red", "black", "blue")) +
+  scale_colour_manual(
+    breaks = c("Destroyed", "Compensation", "Main Stem"), 
+    values=c("black", "black", "grey")) +
+    scale_shape_manual(
+      breaks = c("Destroyed", "Compensation", "Main Stem"), 
+      values=c(0, 16, 16)) +
   # theme(axis.text.x  = element_text(vjust=0.4, size=12)) +
   # theme(axis.text.y  = element_text(vjust=0.4, size=12)) +
   # theme(axis.title.y  = element_text(vjust=0.4, size=12)) +
   # theme(axis.title.x  = element_text(vjust=0.4, size=12)) +
-  ylab("Biomass Estimate (grams/100 sq. meters)") + 
+  # ylab("Biomass Estimate (grams/100 sq. meters)") + 
+  ylab(expression("Density Estimate (#/100 m" ^2*")")) +
   xlab("Year") +
   theme(legend.title=element_blank()) +
   theme(legend.position = "inside", legend.position.inside = c(.2, .2)) +
   theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
   
 RB_Density_MainandComp_se
-
+ggsave("figs/salmonids_density_by_trt.png", width=10, height=8, units="in")
 
 # Fig 7 ----
 # so not only are the error bars off, between this and Kristin's plot, there is a discrepancy between AS:Main:2002 and BT:Main:2000
