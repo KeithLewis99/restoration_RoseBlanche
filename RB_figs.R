@@ -37,12 +37,14 @@ ggplot(RB_MeanBioComp[3:6,], aes(as.factor(year), meanbiomass)) +
     # theme(axis.title.y  = element_text(vjust=0.4, size=12)) +
     # theme(axis.title.x  = element_text(vjust=0.4, size=12)) +
     #ylab("Biomass Estimate (grams/100 sq. meters)") + 
-    ylab(expression("Biomass Estimate (g/m" ^2*")")) + 
+    ylab(expression("Biomass Estimate (g/100 m" ^2*")")) + 
     xlab("Year") +
     theme(legend.title=element_blank()) +
     theme(legend.position = "inside", legend.position.inside = c(.20, .85)) +
     theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank()) +
     geom_hline(yintercept = RB_MeanBioComp[1,3], colour = "red") +
+    geom_hline(yintercept = 42, colour = "red", linetype = "dashed") + # density of dewatered area
+    geom_hline(yintercept = 42*5.7, colour = "red", linetype = "dashed") + # 
   scale_colour_manual(
     breaks = c("Destroyed", "Compensation", "Main Stem"), 
     values=c("black", "black", "grey")) +
