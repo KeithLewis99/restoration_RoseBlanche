@@ -253,4 +253,12 @@ kbl(all_bio_ci_tabC,
 # 
 # write.csv(year_bio_tot.ci, "data_derived/biomass_all_year.csv")
 
+## percent change ----
+all_bio_ci |> filter(Species == "AS")
+((all_bio_ci[8,4] - all_bio_ci[6,4])/all_bio_ci[6,4])*100
+all_bio_ci |> filter(Species == "ASYOY")
+((all_bio_ci[16,4] - all_bio_ci[14,4])/all_bio_ci[14,4])*100
+
+
+
 # END ----
