@@ -258,7 +258,7 @@ Column
 kbl(tabC[, c(1:2, 9,10)], 
     col.names = c('Species-age', 'Parameter', 'Density',
                   'Biomass'),
-    align = 'c', caption = "Density and Biomass CIs", digits = 3 ) |>
+    align = 'c', caption = "Density and Biomass 95% CIs", digits = 3 ) |>
   collapse_rows(valign = "top",
                 latex_hline = "major") |>
   add_header_above(header = c(" " = 2, "Density" = 1, "Biomass" = 1)) |>
@@ -339,3 +339,71 @@ Column
 knitr::include_graphics("figs/species_bio_ci.png")
 ```
 
+Density {data-navmenu="BLUPs"}
+=====
+
+Column
+-----------------------------------------------------------------------
+
+BT
+
+```{r}
+knitr::include_graphics("output/BT_density_blups.png")
+```
+
+BTY
+```{r}
+knitr::include_graphics("output/BTY_density_blups.png")
+```
+
+
+Column
+-----------------------------------------------------------------------
+
+AS
+
+```{r}
+knitr::include_graphics("output/AS_density_blups.png")
+```
+
+ASY
+```{r}
+knitr::include_graphics("output/ASY_density_blups.png")
+```
+
+
+
+Biomass {data-navmenu="BLUPs"}
+=====
+
+
+Column
+-----------------------------------------------------------------------
+
+BT
+
+```{r}
+knitr::include_graphics("output/BT_biomass_blups.png")
+```
+
+BTY
+```{r}
+knitr::include_graphics("output/BTY_biomass_blups.png")
+```
+
+
+Column
+-----------------------------------------------------------------------
+
+AS
+
+```{r}
+knitr::include_graphics("output/AS_biomass_blups.png")
+```
+
+ASY
+```{r}
+knitr::include_graphics("output/ASY_biomass_blups.png")
+```
+
+# Notes
