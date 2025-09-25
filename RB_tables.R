@@ -26,14 +26,20 @@ as_den_ci$species <- "AS"
 asyoy_den_ci$species <- "ASYOY"
 
 # bind CIs from param estimates
-tab_den <- rbind(bt_den_ci[1:3,-1], btyoy_den_ci[1:3,-1], as_den_ci[1:3, -1], asyoy_den_ci[1:3, -1])
+tab_den <- rbind(bt_den_ci[1:6,-1], 
+                 btyoy_den_ci[1:2,-1], 
+                 as_den_ci[1:2, -1], 
+                 asyoy_den_ci[1:2, -1])
 
 bt_bio_ci$species <- "BT"
 btyoy_bio_ci$species <- "BTYOY"
 as_bio_ci$species <- "AS"
 asyoy_bio_ci$species <- "ASYOY"
 
-tab_bio <- rbind(bt_bio_ci[1:3,-1], btyoy_bio_ci[1:3,-1], as_bio_ci[1:3, -1], asyoy_bio_ci[1:3, -1])
+tab_bio <- rbind(bt_bio_ci[1:6,-1], 
+                 btyoy_bio_ci[1:2,-1], 
+                 as_bio_ci[1:2, -1], 
+                 asyoy_bio_ci[1:2, -1])
 
 # change the parameter names
 tab <- cbind(tab_den, tab_bio[, 2:4])
