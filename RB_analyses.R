@@ -28,6 +28,14 @@ df_a |>
             a0 = sum(abun == 0))
 
 
+df_a |>
+  group_by(Year, type) |>
+  summarise(biomass = sum(bio)) |>
+  print(n = Inf, wdith = Inf)
+
+area_2015 <- df_a |> filter(Year == 2015 & Station <= 7 & Species == "AS") |> distinct(Area)
+sum(area_2015$`sum(Area)`)*10000/2824 # crossproduct of area of treatments in 2015, scaling to the full area of Compensation Creek, and dividing by sum of biomass for 2015 treatment.  Its the last value in above.
+
 # Density ----
 ## BT ----
 ### data ----
