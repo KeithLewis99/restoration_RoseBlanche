@@ -218,10 +218,10 @@ p4_clean <- p4 + theme(axis.title = element_blank())
 #plot_grid(p1, p2, p3, p4, labels = c('A', 'B', 'C', 'D'), nrow = 2) # this is OK but labels look lame and need to be species names
 
 ggsave("output/all_density_boot_new.png", width=10, height=8, units="in")
-grid_den <- plot_grid(p1_clean, 
+grid_den <- plot_grid(p3_clean, 
                       p4_clean,
+                      p1_clean, 
                       p2_clean, 
-                      p3_clean, 
                       ncol = 2, align = "hv", axis = "tblr",
                       scale = 0.9,
                       labels = c("AS", "ASY","BT", "BTY"),
@@ -261,10 +261,10 @@ p8_clean <- p8 + theme(axis.title = element_blank())
 
 # plot_grid(p5, p6, p7, p8, labels = c('A', 'B', 'C', 'D'), nrow = 2)
 
-grid_plot <- plot_grid(p5_clean, 
+grid_plot <- plot_grid(p7_clean, 
                        p8_clean,
+                       p5_clean, 
                        p6_clean, 
-                       p7_clean, 
                        ncol = 2, 
                        align = "hv", 
                        axis = "tblr",
