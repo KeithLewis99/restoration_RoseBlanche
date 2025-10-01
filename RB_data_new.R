@@ -327,10 +327,16 @@ df_sum |> group_by(Year, Species, Station) |>
   ungroup() |>
   summarise(tot = n())
 
+### zeros ----
 # zeros - 31 of these
 df_a |>
   filter(abun == 0)
 
+### > 30 ----
+# 10 of 160 Year:Species:Stations > 30
+df_a |>
+  filter(abun >= 30) |>
+  nrow()
 
 ## tables ----
 ## number of sweeps per station
@@ -340,7 +346,7 @@ df_sum |>
   pivot_wider(id_cols = c(Year, Species), 
               names_from = Station, values_from = Sweeps)
 
-# 4-5 passes
+### 4-5 passes ----
 df_all2$pass_no <-NA
 
 # summarize just 4-5-pass sites and had fish
@@ -359,8 +365,10 @@ df_4_5pass <- df_all2 |>
 #   relocate(`1`, .after = Station) |>
 #   relocate(`4`, .after = `3`)
 
-df_4_5pass |> print(n = Inf)
-
+df_4_5pass |> print(n = Inf) # suggests that 25 Year:Species:Stations out of 160 had fish after 3 passes but:
+## Sweep 4: 
+## Sweep 5: had one fish total
+hist(df_4_5pass$`4`)
 str(df_4_5pass, give.attr = F)
 
 ## The below is used in RB_abun_bio.R for the FSA Carle-Strub estimates.
