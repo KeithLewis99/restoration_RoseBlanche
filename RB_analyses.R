@@ -164,9 +164,26 @@ tab.ci(best_model, "bt_den")
 
 ## emmeans
 emmeans(best_model, ~ type, component = "cond")
+
 emm.bt.den <- as.data.frame(emmeans(best_model, ~ type,       component = "response"))
+
 ((emm.bt.den[2,2]-emm.bt.den[1,2])/
     emm.bt.den[1,2])*100
+cond_BT <- summary(best_model)$coefficients$cond
+cond_BT <- summary(bt.glmm2)$coefficients$cond
+
+cond_BT[1,1] + cond_BT[2,1]*0 + cond_BT[3,1]*0 + cond_BT[4,1]*47 + 
+cond_BT[1,1] + cond_BT[2,1] + cond_BT[3,1]*1 + cond_BT[4,1]*47 +
+cond_BT[1,1] + cond_BT[2,1] + cond_BT[3,1]*2 + cond_BT[4,1]*47 +
+cond_BT[1,1] + cond_BT[2,1] + cond_BT[3,1]*15 + cond_BT[4,1]*47
+
+broom.helpers::model_get_model_matrix(bt.glmm2)
+mm_cond <- model.matrix(bt.glmm2, component = "cond")
+mm_rand <- getME(bt.glmm2, "Z")
+mm_cond_zi <- model.matrix(bt.glmm2, component = "zi")
+
+ranef(bt.glmm1)
+df_aBT$north
 
 #### blup ---- 
 btd_rdm <- modelbased::estimate_grouplevel(best_model)
