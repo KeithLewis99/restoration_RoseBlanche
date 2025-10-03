@@ -259,6 +259,56 @@ all_bio_ci |> filter(Species == "AS")
 all_bio_ci |> filter(Species == "ASYOY")
 ((all_bio_ci[16,4] - all_bio_ci[14,4])/all_bio_ci[14,4])*100
 
+# all salmonids ----
+### Bootstrap
 
+
+## import data ----
+df_a <- read.csv("data_derived/df_a3.csv")
+
+
+## density - CI ----
+
+# Hmisc - ben bolker approach
+#https://stackoverflow.com/questions/38554383/bootstrapped-confidence-intervals-with-dplyr
+library(Hmisc)
+library(dplyr)
+library(kableExtra)
+library(tidyr)
+
+# add up density or biomass by station, then scale by area, then bootstrap
+tmp <- df_a |>
+  group_by(Year, Station, Area) |> 
+  summarise(sum_den = sum(abun)) 
+
+tmp$abun.stand <- tmp$sum_den/tmp$Area*100
+tmp$trt <- ifelse(tmp$Station <= 7, "trt", "con")
+
+sal_den_stn.ci <- tmp |>
+  group_by(Year, trt) |>
+  do(data.frame(rbind(Hmisc::smean.cl.boot(.$abun.stand)))) |>
+  rename(mean = Mean, ll = Lower, ul = Upper)
+
+write.csv(sal_den_stn.ci, "data_derived/sal_density_ci.csv")
+
+
+## biomass - CI ----
+tmp <- df_a |>
+  group_by(Year, Station, Area) |> 
+  summarise(sum_bio = sum(bio)) 
+
+tmp$bio.stand <- tmp$sum_bio/tmp$Area*100
+tmp$trt <- ifelse(tmp$Station <= 7, "trt", "con")
+
+sal_bio_stn.ci <- tmp |>
+  group_by(Year, trt) |>
+  do(data.frame(rbind(Hmisc::smean.cl.boot(.$bio.stand)))) |>
+  rename(mean = Mean, ll = Lower, ul = Upper)
+
+sal_bio_stn.ci |>
+  group_by(Year, trt) |>
+  summarise(mean_trt = mean(mean))
+
+write.csv(sal_bio_stn.ci, "data_derived/sal_biomass_ci.csv")
 
 # END ----

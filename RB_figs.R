@@ -2,8 +2,13 @@
 
 # I think that Fig 4 is redundant wtih 5.  Therefore, I have modified 5 accordingly.
 
+# library ----
 library(ggplot2)
 source("RB_data.R")
+
+sal_den_ci <- read.csv("data_derived/sal_density_ci.csv")
+sal_bio_ci <- read.csv("data_derived/sal_biomass_ci.csv")
+str(sal_bio_ci)
 
 # Fig 4 ----
 
@@ -54,6 +59,38 @@ ggplot(RB_MeanBioComp[3:6,], aes(as.factor(year), meanbiomass)) +
 RB_Biomass_MainandComp_se
 ggsave("figs/salmonids_biomass_by_trt.png", width=10, height=8, units="in")
 
+## boot ----
+# for bootstrap values
+
+ggplot(sal_bio_ci, 
+         aes(as.factor(Year), mean)) + 
+  theme_bw(base_size = 20) + 
+  geom_point(aes(colour=as.factor(trt), shape=as.factor(trt)), position=position_dodge(0.5), size = 3) + 
+  geom_vline(xintercept = 3.5, linetype = "dashed") +
+  geom_errorbar(aes(ymax= ll, ymin=ul, colour = as.factor(trt)), linewidth=0.6, width=0.30, position=position_dodge(.5)) +
+  ylab(expression("Biomass Estimate (g/100 m" ^2*")")) + 
+  xlab("Year") +
+  theme(legend.title=element_blank()) +
+  theme(legend.position = "inside", legend.position.inside = c(.20, .85)) +
+  theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank()) +
+  geom_hline(yintercept = RB_MeanBioComp[1,3], colour = "red") +
+  # geom_hline(yintercept = 42, colour = "red", linetype = "dashed") + # density of dewatered area
+  # geom_hline(yintercept = 42*5.7, colour = "red", linetype = "dashed") + # 
+  scale_colour_manual(
+    breaks = c("con", "trt"),
+    labels = c("Control", "Treatment"),
+    values=c("grey", "black")) +
+  scale_shape_manual(
+    breaks = c("con", "trt"), 
+    labels = c("Control", "Treatment"),
+    values=c(16, 16))
+
+ggsave("figs/salmonids_biomass_boot_by_trt.png", width=10, height=8, units="in")
+
+
+
+
+
 # Fig 6 ----  
 RB_Density_MainandComp_se <- 
   ggplot(RB_meansalmonidsbysite, 
@@ -84,6 +121,35 @@ RB_Density_MainandComp_se <-
   
 RB_Density_MainandComp_se
 ggsave("figs/salmonids_density_by_trt.png", width=10, height=8, units="in")
+
+## boot ----
+# for bootstrap values
+
+ggplot(sal_den_ci, 
+       aes(as.factor(Year), mean)) + 
+  theme_bw(base_size = 20) + 
+  geom_point(aes(colour=as.factor(trt), shape=as.factor(trt)), position=position_dodge(0.5), size = 3) + 
+  geom_vline(xintercept = 3.5, linetype = "dashed") +
+  geom_errorbar(aes(ymax= ll, ymin=ul, colour = as.factor(trt)), linewidth=0.6, width=0.30, position=position_dodge(.5)) +
+  ylab(expression("Density Estimate (#/100 m" ^2*")")) +
+  xlab("Year") +
+  theme(legend.title=element_blank()) +
+  theme(legend.position = "inside", legend.position.inside = c(.20, .85)) +
+  theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank()) +
+  geom_hline(yintercept = RB_meansalmonidsbysite[1,6], colour = "red") +
+   scale_colour_manual(
+    breaks = c("con", "trt"),
+    labels = c("Control", "Treatment"),
+    values=c("grey", "black")) +
+  scale_shape_manual(
+    breaks = c("con", "trt"), 
+    labels = c("Control", "Treatment"),
+    values=c(16, 16))
+
+ggsave("figs/salmonids_density_boot_by_trt.png", width=10, height=8, units="in")
+
+
+
 
 # Fig 7 ----
 # so not only are the error bars off, between this and Kristin's plot, there is a discrepancy between AS:Main:2002 and BT:Main:2000
