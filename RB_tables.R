@@ -310,8 +310,8 @@ write.csv(sal_bio_stn.ci, "data_derived/sal_biomass_ci.csv")
 
 # 2000
 bio2000 <- tmp |> filter(Year == 2000 & trt == "trt")
-bio2000_boot <- Hmisc::smean.cl.boot(bio2000$bio.stand,reps = T)
-str(tmp3)
+bio2000_boot <- Hmisc::smean.cl.boot(bio2000$bio.stand,reps = T, B = 10000)
+str(bio2000_boot)
 bio2000_boot_vals <- attr(bio2000_boot, "reps") 
 plot(density(bio2000_boot_vals))
 length(bio2000_boot_vals)
@@ -319,7 +319,7 @@ length(bio2000_boot_vals[bio2000_boot_vals > 239])
 
 # 2001
 bio2001 <- tmp |> filter(Year == 2001 & trt == "trt")
-bio2001_boot <- Hmisc::smean.cl.boot(bio2001$bio.stand,reps = T)
+bio2001_boot <- Hmisc::smean.cl.boot(bio2001$bio.stand,reps = T, B = 10000)
 bio2001_boot_vals <- attr(bio2001_boot, "reps") 
 plot(density(bio2001_boot_vals))
 length(bio2001_boot_vals)
@@ -327,15 +327,15 @@ length(bio2001_boot_vals[bio2001_boot_vals > 239])
 
 # 2002
 bio2002 <- tmp |> filter(Year == 2002 & trt == "trt")
-bio2002_boot <- Hmisc::smean.cl.boot(bio2002$bio.stand,reps = T)
+bio2002_boot <- Hmisc::smean.cl.boot(bio2002$bio.stand,reps = T, B = 10000)
 str(tmp3)
 bio2002_boot_vals <- attr(bio2002_boot, "reps") 
 plot(density(bio2002_boot_vals))
 length(bio2002_boot_vals)
 length(bio2002_boot_vals[bio2002_boot_vals > 239])
 
-length(bio2000_boot_vals[bio2000_boot_vals > 239])/1000*100
-length(bio2001_boot_vals[bio2001_boot_vals > 239])/1000*100
-length(bio2002_boot_vals[bio2002_boot_vals > 239])/1000*100
+length(bio2000_boot_vals[bio2000_boot_vals > 239])/10000*100
+length(bio2001_boot_vals[bio2001_boot_vals > 239])/10000*100
+length(bio2002_boot_vals[bio2002_boot_vals > 239])/10000*100
 
 # END ----
