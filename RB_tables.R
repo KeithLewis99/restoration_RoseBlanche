@@ -96,6 +96,22 @@ kbl(tabC[, c(1:2, 9,10)],
 ## import data ----
 df_a <- read.csv("data_derived/df_a3.csv")
 
+# check what drives CI width
+library(ggplot2)
+df_a |> 
+  filter((Year == "2015" | Year == "2002") & Species == "AS") |>
+  select(Year, Station, Species, type, abun.stand, bio.stand, north) |>
+  arrange(Species)
+| Year == "2002"
+tmp <- df_a |> 
+  filter((Year == "2015" ) & Species == "AS" & type == "trt") |>
+  select(Year, Station, Species, type, abun.stand, bio.stand, north) |>
+  arrange(Species)
+
+# this is just to test if there is a S-N gradient, perhaps due to infilling
+ggplot(tmp, aes(x = north, y = abun.stand, group = Year, colour = as.factor(Year))) + 
+  geom_point() +
+  geom_smooth(method = "lm")
 
 ## density - CI ----
 
