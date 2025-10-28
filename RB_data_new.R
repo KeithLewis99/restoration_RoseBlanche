@@ -332,6 +332,30 @@ df_sum |> group_by(Year, Species, Station) |>
 df_a |>
   filter(abun == 0)
 
+# 41 Stations had no fish after 3 sweeps
+tmp1 <- df_all2 |>
+  group_by(Year, Species, Station)|>
+  filter(Sweep <= 3) |>
+  summarise(sum_zero = sum(abun)) |>
+  filter(sum_zero == 0) |>
+  print(n = Inf)
+
+
+# 40 had no fish ever
+tmp2 <- df_all2 |>
+  group_by(Year, Species, Station)|>
+  summarise(sum_zero = sum(abun)) |>
+  filter(sum_zero == 0) |>
+  print(n = Inf)
+
+# these stations had fish on Sweep > 3
+# all had fish on 4th or 5th sweep and n = 1 | n = 2; so 5 out of 41 are not real zeros out of 336 samples
+anti_join(tmp1, tmp2, by = c("Year", "Species", "Station"))
+
+df_all2 |> filter(Year == 1996 & Species == "BT" & Station == "4")
+
+
+
 ### > 30 ----
 # 10 of 160 Year:Species:Stations > 30
 df_a |>
