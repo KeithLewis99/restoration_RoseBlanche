@@ -289,5 +289,132 @@ save_plot("figs/species_bio_ci.png",
 
 ggsave("output/all_biomass_boot_new.png", width=10, height=8, units="in")
 
+# replacement -----
+
+library(ggplot2)
+source("RB_data.R")
+
+sal_den_ci <- read.csv("data_derived/sal_density_ci.csv")
+sal_bio_ci <- read.csv("data_derived/sal_biomass_ci.csv")
+str(sal_bio_ci)
+
+# 
+## density ----
+# for bootstrap values
+
+ggplot(sal_den_ci, 
+       aes(as.factor(Year), mean)) + 
+  theme_bw(base_size = 20) + 
+  geom_point(aes(colour=as.factor(trt), shape=as.factor(trt)), position=position_dodge(0.5), size = 3) + 
+  geom_vline(xintercept = 3.5, linetype = "dashed") +
+  geom_errorbar(aes(ymax= ll, ymin=ul, colour = as.factor(trt)), linewidth=0.6, width=0.30, position=position_dodge(.5)) +
+  ylab(expression("Density Estimate (#/100 m" ^2*")")) +
+  xlab("Year") +
+  theme(legend.title=element_blank()) +
+  theme(legend.position = "inside", legend.position.inside = c(.20, .85)) +
+  theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank()) +
+  geom_hline(yintercept = RB_meansalmonidsbysite[1,6], colour = "red") +
+  scale_colour_manual(
+    breaks = c("con", "trt"),
+    labels = c("Control", "Treatment"),
+    values=c("grey", "black")) +
+  scale_shape_manual(
+    breaks = c("con", "trt"), 
+    labels = c("Control", "Treatment"),
+    values=c(16, 16))
+
+ggsave("figs/salmonids_density_boot_by_trt.png", width=10, height=8, units="in")
+
+
+# density unscaled
+ggplot(sal_den_ci, 
+       aes(as.factor(Year), mean*100)) + 
+  theme_bw(base_size = 20) + 
+  geom_point(aes(colour=as.factor(trt), shape=as.factor(trt)), position=position_dodge(0.5), size = 3) + 
+  geom_vline(xintercept = 3.5, linetype = "dashed") +
+  geom_errorbar(aes(ymax= ll*100, ymin=ul*100, colour = as.factor(trt)), linewidth=0.6, width=0.30, position=position_dodge(.5)) +
+  ylab("Abundance") +
+  xlab("Year") +
+  theme(legend.title=element_blank()) +
+  theme(legend.position = "inside", legend.position.inside = c(.20, .85)) +
+  theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank()) +
+  geom_hline(yintercept = RB_meansalmonidsbysite[1,6]*100, colour = "red") +
+  scale_colour_manual(
+    breaks = c("con", "trt"),
+    labels = c("Control", "Treatment"),
+    values=c("grey", "black")) +
+  scale_shape_manual(
+    breaks = c("con", "trt"), 
+    labels = c("Control", "Treatment"),
+    values=c(16, 16))
+
+ggsave("figs/salmonids_abundance_boot_by_trt.png", width=10, height=8, units="in")
+
+ 
+## biomass ----
+# for bootstrap values
+
+ggplot(sal_bio_ci, 
+       aes(as.factor(Year), mean)) + 
+  theme_bw(base_size = 20) + 
+  geom_point(aes(colour=as.factor(trt), shape=as.factor(trt)), position=position_dodge(0.5), size = 3) + 
+  geom_vline(xintercept = 3.5, linetype = "dashed") +
+  geom_errorbar(aes(ymax= ll, ymin=ul, colour = as.factor(trt)), linewidth=0.6, width=0.30, position=position_dodge(.5)) +
+  ylab(expression("Biomass Estimate (g/100 m" ^2*")")) + 
+  xlab("Year") +
+  theme(legend.title=element_blank()) +
+  theme(legend.position = "inside", legend.position.inside = c(.20, .85)) +
+  theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank()) +
+  geom_hline(yintercept = RB_MeanBioComp[1,3], colour = "red") +
+  # geom_hline(yintercept = 42, colour = "red", linetype = "dashed") + # density of dewatered area
+  # geom_hline(yintercept = 42*5.7, colour = "red", linetype = "dashed") + # 
+  scale_colour_manual(
+    breaks = c("con", "trt"),
+    labels = c("Control", "Treatment"),
+    values=c("grey", "black")) +
+  scale_shape_manual(
+    breaks = c("con", "trt"), 
+    labels = c("Control", "Treatment"),
+    values=c(16, 16))
+
+ggsave("figs/salmonids_biomass_boot_by_trt.png", width=10, height=8, units="in")
+
+# just biomass
+ggplot(sal_bio_ci, 
+       aes(as.factor(Year), mean*100)) + 
+  theme_bw(base_size = 20) + 
+  geom_point(aes(colour=as.factor(trt), shape=as.factor(trt)), position=position_dodge(0.5), size = 3) + 
+  geom_vline(xintercept = 3.5, linetype = "dashed") +
+  geom_errorbar(aes(ymax= ll*100, ymin=ul*100, colour = as.factor(trt)), linewidth=0.6, width=0.30, position=position_dodge(.5)) +
+  ylab("Biomass Estimate (g)") + 
+  xlab("Year") +
+  theme(legend.title=element_blank()) +
+  theme(legend.position = "inside", legend.position.inside = c(.20, .85)) +
+  theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank()) +
+  geom_hline(yintercept = RB_MeanBioComp[1,3]*100, colour = "red") +
+  # geom_hline(yintercept = 42, colour = "red", linetype = "dashed") + # density of dewatered area
+  # geom_hline(yintercept = 42*5.7, colour = "red", linetype = "dashed") + # 
+  scale_colour_manual(
+    breaks = c("con", "trt"),
+    labels = c("Control", "Treatment"),
+    values=c("grey", "black")) +
+  scale_shape_manual(
+    breaks = c("con", "trt"), 
+    labels = c("Control", "Treatment"),
+    values=c(16, 16))
+
+ggsave("figs/salmonids_biomass_unscaled_boot_by_trt.png", width=10, height=8, units="in")
+
+
+# Scruton 2005 Table III ----
+tab <- sal_bio_ci |>
+  filter(trt != "con") |>
+  select(Year, mean) |>
+  mutate(Total_biomass = mean*100)
+
+tmp <- tab[1, ]
+tmp[1,] <- c(1998, 42, 42*570)
+
+tab <- bind_rows(tmp, tab)
 
 # END ----
