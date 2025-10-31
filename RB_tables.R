@@ -92,17 +92,22 @@ kbl(tabC[, c(1:2, 9,10)],
 # The below is tables and bootstrapped values to get CIs around density and biomass estimates that don't overlap zero.  
 # the corresponding figures are in RB_figs_new under bootstrap
 ## using kable() and kableExtra() - see website: https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html#Grouped_Columns__Rows
+library(Hmisc)
+library(dplyr)
+library(kableExtra)
+library(tidyr)
+library(ggplot2)
 
 ## import data ----
 df_a <- read.csv("data_derived/df_a3.csv")
 
 # check what drives CI width
-library(ggplot2)
+
 df_a |> 
   filter((Year == "2015" | Year == "2002") & Species == "AS") |>
   select(Year, Station, Species, type, abun.stand, bio.stand, north) |>
   arrange(Species)
-| Year == "2002"
+
 tmp <- df_a |> 
   filter((Year == "2015" ) & Species == "AS" & type == "trt") |>
   select(Year, Station, Species, type, abun.stand, bio.stand, north) |>
@@ -324,6 +329,8 @@ str(sal_bio_stn.ci)
 
 write.csv(sal_bio_stn.ci, "data_derived/sal_biomass_ci.csv")
 
+
+### bootstrap to get p-values for biomass ----
 # 2000
 bio2000 <- tmp |> filter(Year == 2000 & trt == "trt")
 bio2000_boot <- Hmisc::smean.cl.boot(bio2000$bio.stand,reps = T, B = 10000)
@@ -344,7 +351,7 @@ length(bio2001_boot_vals[bio2001_boot_vals > 239])
 # 2002
 bio2002 <- tmp |> filter(Year == 2002 & trt == "trt")
 bio2002_boot <- Hmisc::smean.cl.boot(bio2002$bio.stand,reps = T, B = 10000)
-str(tmp3)
+
 bio2002_boot_vals <- attr(bio2002_boot, "reps") 
 plot(density(bio2002_boot_vals))
 length(bio2002_boot_vals)
