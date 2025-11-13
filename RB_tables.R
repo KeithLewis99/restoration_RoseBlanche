@@ -100,7 +100,7 @@ library(ggplot2)
 
 ## import data ----
 df_a <- read.csv("data_derived/df_a3.csv")
-
+df_a |> group_by(Year, type) |> summarise(bio_tot = sum(bio))
 # check what drives CI width
 
 df_a |> 
@@ -317,9 +317,12 @@ write.csv(sal_den_stn.ci, "data_derived/sal_density_ci.csv")
 tmp <- df_a |>
   group_by(Year, Station, Area) |> 
   summarise(sum_bio = sum(bio)) 
+df_a |> group_by(Year, type) |> summarise(bio_tot = sum(bio))
+df_a |> group_by(Year) |> summarise(bio_tot = sum(bio))
 
 tmp$bio.stand <- tmp$sum_bio/tmp$Area*100
 tmp$trt <- ifelse(tmp$Station <= 7, "trt", "con")
+#tmp$trt <- ifelse(as.integer(tmp$Station) <= 7, "trt", "con")
 
 sal_bio_stn.ci <- tmp |>
   group_by(Year, trt) |>
