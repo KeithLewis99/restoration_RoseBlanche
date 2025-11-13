@@ -417,4 +417,147 @@ tmp[1,] <- c(1998, 42, 42*570)
 
 tab <- bind_rows(tmp, tab)
 
-# END ----
+
+# large fish ----
+unique(df_all$Species)
+df_all <- df_all |> 
+  filter(Sweep <= 3 & Species == "BT"| Species == "AS") |>
+  mutate(large = ifelse(Length.mm >= 150, "Y", "N"))
+
+tmp1 <- df_all |>
+  group_by(Year, Species, Station) |>
+  summarise(count = n())
+
+tmp2 <- df_all |>
+  filter(large == "Y") |>
+  group_by(Year, Species, Station) |>
+  summarise(count_large = n())
+
+df_percent <- left_join(tmp1, tmp2, by = c("Year", "Species", "Station"))
+
+df_percent$count_large[is.na(df_percent$count_large)] <- 0
+df_percent <- df_percent |> 
+  mutate(prob_large = count_large/count,
+         trt = ifelse(Station <=7, "trt", "con"))
+
+df_percent_sum <- df_percent |>
+  group_by(Year, Species, trt) |>
+  summarise(mean = mean(prob_large),
+            sd = sd(prob_large),
+            count = sum(count)) 
+
+library(Hmisc)
+df_percent_boot <- df_percent |>
+group_by(Year, Species, trt) |>
+  do(data.frame(rbind(Hmisc::smean.cl.boot(.$prob_large)))) |>
+  rename(mean = Mean, ll = Lower, ul = Upper)
+df_percent_boot
+
+df_percent_boot <- left_join(df_percent_boot, df_percent_sum[, c(1:3, 6)], by = c("Year", "Species", "trt"))
+
+df_percent_boot$label <- ifelse(
+  !is.na(df_percent_boot$ul), 
+  df_percent_boot$ul + 0.05,
+  df_percent_boot$mean + 0.05)
+
+### fig ----
+ggplot(df_percent_boot, 
+       aes(x = as.factor(Year), y = mean)) + 
+  theme_bw(base_size = 20) + 
+  geom_point(aes(colour=as.factor(trt), shape=as.factor(trt)), position=position_dodge(0.5), size = 3) + 
+  geom_text(aes(label = count, y = label, group = as.factor(trt)), position=position_dodge(0.5), check_overlap = FALSE) +
+  geom_vline(xintercept = 3.5, linetype = "dashed") +
+  geom_errorbar(aes(ymax= ll, ymin=ul, colour = as.factor(trt)), linewidth=0.6, width=0.30, position=position_dodge(.5)) +
+  ylab(expression("Percent of age-1+ fish" >= "150 mm")) +
+  xlab("Year") +
+  facet_grid(~Species) +
+  theme(legend.title=element_blank()) +
+  theme(legend.position = "inside", legend.position.inside = c(.60, .85)) +
+  theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank()) +
+  scale_colour_manual(
+    breaks = c("con", "trt"),
+    labels = c("Control", "Treatment"),
+    values=c("grey", "black")) +
+  scale_shape_manual(
+    breaks = c("con", "trt"), 
+    labels = c("Control", "Treatment"),
+    values=c(16, 16))
+
+#ggsave("figs/large_fish_percent_by_trt.png", width=10, height=8, units="in")
+
+### purrr -----
+df_per_boot_split <- df_percent_boot |> 
+  split(df_percent_boot$Species)
+
+
+library(purrr)
+plot_per <- map(names(df_per_boot_split), function(Species) {
+  df <- df_per_boot_split[[Species]]  
+  legend_BT <- if(any(df$Species == "BT"))theme(
+    legend.position=c(0.45, 0.88),
+    legend.background = element_rect(fill = "transparent", color = NA), legend.title=element_blank(),
+  legend.key.size = unit(0.4, "cm")
+  )
+  legend_notBT <- if(any(df$Species != "BT"))
+    theme(legend.position= "none")
+  ggplot(df, 
+         aes(as.factor(Year), mean)) + 
+    theme_bw(base_size = 20) + 
+    geom_point(aes(colour=as.factor(trt), shape=as.factor(trt)), position=position_dodge(0.5), size = 3) + 
+    legend_notBT +
+    legend_BT +
+    ylim(0, 1.1) +
+    geom_vline(xintercept = 3.5, linetype = "dashed") +
+    geom_errorbar(aes(ymax= ll, ymin=ul, colour = as.factor(trt)), linewidth=0.6, width=0.30, position=position_dodge(.5)) +
+    geom_text(aes(label = count, y = label, group = as.factor(trt)), position=position_dodge(0.5)) +
+    ylab(expression("Percent of age-1+ fish" >= "150 mm")) +
+    xlab("Year") +
+    # theme(legend.title=element_blank()) +
+    # theme(legend.position = "inside", legend.position.inside = c(.60, .85)) +
+    theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank()) +
+    scale_colour_manual(
+      breaks = c("con", "trt"),
+      labels = c("Control", "Treatment"),
+      values=c("grey", "black")) +
+    scale_shape_manual(
+      breaks = c("con", "trt"), 
+      labels = c("Control", "Treatment"),
+      values=c(16, 16))
+  
+})  
+
+
+names(plot_per) <- paste0(names(df_per_boot_split))
+list2env(plot_per, envir = .GlobalEnv)
+p1 <- plot_per$AS
+p2 <- plot_per$BT
+
+
+### combine ----
+p1_clean <- p1 + theme(axis.title = element_blank())
+p2_clean <- p2 + theme(axis.title = element_blank())
+
+grid_plot <- plot_grid(p1_clean, 
+                       p2_clean,
+                       ncol = 2, 
+                       align = "hv", 
+                       axis = "tblr",
+                       scale = 0.9,
+                       labels = c("AS", "BT"),
+                       hjust = -3, 
+                       vjust = 1.25)
+
+# Add shared axis labels
+final_plot_bio <- ggdraw(grid_plot) +
+  draw_label("Year", x = 0.5, y = 0, vjust = -0.5, fontface = "bold", size = 20) +
+  draw_label(expression("Percent of age-1+ fish" >= "150 mm"), x = 0, y = 0.5, angle = 90, vjust = 1.5, fontface = "bold", size = 20)
+
+final_plot_bio
+save_plot("figs/large_fish_percent_boot_by_trt.png", 
+          final_plot_bio, 
+          base_height = 6, 
+          base_width = 10,
+          bg = "white")
+
+  
+  # END ----
