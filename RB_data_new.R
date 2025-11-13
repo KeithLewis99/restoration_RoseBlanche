@@ -256,6 +256,7 @@ str(df_a, give.attr=FALSE)
 ## area ----
 station <- as.character(1:10)
 library(readxl)
+# add 2001 area from datasheet
 area_2001 <- read_excel("../data/Rose Blanche - EF Site Dimensions.xls", 
            sheet = "August 2001", 
            range = "A3:D13") |>
@@ -270,6 +271,9 @@ df_area <- df_all |>
 df_area <- rbind(df_area, area_2001[, c(5, 1, 4)]) |>
   arrange(Year)
 df_area |> print(n = Inf)
+df_area |> 
+  filter(Year == 2015 & Station <= 7) |> 
+  summarise(Area_tot = sum(Area))
 
 df_a <- left_join(df_a, df_area, by = c("Year", "Station"))
 
