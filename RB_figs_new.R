@@ -160,8 +160,8 @@ library(cowplot)
 ## density ----
 ## bootstrap estimates for density and biomass by species and year from RB_tables.R
 den_ci <- read.csv("data_derived/density_ci.csv")
-
-ggplot(den_ci, aes(x = as.factor(Year), y = mean, fill = type, colour = type)) + 
+temp <- den_ci |> filter(Year != "Total")
+ggplot(temp, aes(x = as.factor(Year), y = mean, fill = type, colour = type)) + 
   geom_point(position = position_dodge(width = 0.5), size = 3) +
   facet_wrap(~Species) + 
   theme_bw(base_size = 20) + 
@@ -175,7 +175,8 @@ ggplot(den_ci, aes(x = as.factor(Year), y = mean, fill = type, colour = type)) +
                       name="",
                       breaks=c("con", "trt"),
                       labels=c("Control", "Treatment"))
-ggsave("output/salmonid_density_new.png", width=10, height=8, units="in")
+#ggsave("output/salmonid_density_new.png", width=10, height=8, units="in")
+ggsave("output/salmonid_density_new_noTotal.png", width=10, height=8, units="in")
 
 
 ## biomass ----
@@ -200,6 +201,7 @@ ggsave("output/salmonid_biomass_new.png", width=10, height=8, units="in")
 
 # density - publicatoin -----
 source("RB_fun.R")
+den_ci <- den_ci |> filter(Year != "Total")
 den_ci_bt <- den_ci |> filter(Species == "BT") 
 den_ci_bty <- den_ci |> filter(Species == "BTYOY") 
 den_ci_as <- den_ci |> filter(Species == "AS") 
@@ -224,7 +226,8 @@ grid_den <- plot_grid(p3_clean,
                       p2_clean, 
                       ncol = 2, align = "hv", axis = "tblr",
                       scale = 0.9,
-                      labels = c("AS", "ASY","BT", "BTY"),
+                      #labels = c("AS", "ASY","BT", "BTY"),
+                      labels = c("Atlantic Salmon age-1+", "Atlantic Salmon YOY","Brook Trout age-1+", "Brook Trout YOY"),
                       label_x = 0.1, label_y = 1, 
                       hjust = 0,
                       #hjust = -2, 1
@@ -241,6 +244,13 @@ save_plot("figs/species_den_ci.png",
           base_height = 6, 
           base_width = 10,
           bg = "white")
+
+save_plot("figs/species_den_ci_new.png", 
+          final_plot_den, 
+          base_height = 6, 
+          base_width = 10,
+          bg = "white")
+
 
 ## biomass ----
 bio_ci_bt <- bio_ci |> filter(Species == "BT") 
@@ -371,7 +381,7 @@ ggplot(sal_bio_ci,
   scale_colour_manual(
     breaks = c("con", "trt"),
     labels = c("Control", "Treatment"),
-    values=c("grey", "black")) +
+    values=c("black", "grey")) +
   scale_shape_manual(
     breaks = c("con", "trt"), 
     labels = c("Control", "Treatment"),

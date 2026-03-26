@@ -428,7 +428,7 @@ confint(best_model)
 tab.ci(best_model, "as_den") 
 
 tmp <- confint(best_model)
-tmp[1:5, c(3, 1:2)]
+tmp[1:4, c(3, 1:2)]
 # percent increase
 ((exp(tmp[1,3] + tmp[2,3]))-exp(tmp[1,3]))/exp(tmp[1,3])*100
 

@@ -227,7 +227,9 @@ p <- ggplot(
                    sep = "")
   )) +
   geom_point() +
-  geom_path()
+  geom_path() +
+  ylab("Abundance") +
+  xlab("Sum Previous Catch")
 p
 
 # write.csv(df_all2[df_all2$Species == "AS" & df_all2$Year == 2015,], "data_derived/spc_example.csv") # 40 records
